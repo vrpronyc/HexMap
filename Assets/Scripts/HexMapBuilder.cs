@@ -42,6 +42,8 @@ public class HexMapBuilder : MonoBehaviour
     public Transform m_HexTexQuadTransform;
     public string m_TexturePropertyName = "_DecalTex";
 
+    Mesh m_HexMesh = null;
+
     Dictionary<string, Texture2D> m_HexTextures = new Dictionary<string, Texture2D>();
 
     static string Bits(int i)
@@ -165,6 +167,7 @@ public class HexMapBuilder : MonoBehaviour
                 hex.HexMaterial = renderer.sharedMaterial;
 
                 MeshFilter mf = go.GetComponent<MeshFilter>();
+
                 Vector3[] verts = new Vector3[7];
                 Vector3[] norms = new Vector3[7];
                 for (int i = 0; i < 7; i++)
@@ -207,7 +210,7 @@ public class HexMapBuilder : MonoBehaviour
                     {
                         if ((i & 0x01) == 0)
                         {
-                            verts[i] = m_HexPoints[iy+1][i + startIx].position;
+                            verts[i] = m_HexPoints[iy + 1][i + startIx].position;
                             hexIndices[i] = new Hex.HexIndex(i + startIx, iy + 1);
                         }
                         else
@@ -253,22 +256,61 @@ public class HexMapBuilder : MonoBehaviour
 
                 }
 
-                int[] fs = new int[18] 
-                { 
-                    0, 1, 2, 
-                    1, 3, 2, 
+                int[] fs = new int[18]
+                {
+                    0, 1, 2,
+                    1, 3, 2,
                     2, 3, 4,
                     0, 2, 5,
                     5, 2, 6,
                     6, 2, 4
                 };
 
-                mf.mesh.vertices = verts;
-                mf.mesh.uv = uvs;
-                mf.mesh.uv2 = uv2s;
-                mf.mesh.normals = norms;
-                mf.mesh.triangles = fs;
+                Vector3 hexPos = verts[verts.Length - 1];
+                if (m_HexMesh != null)
+                {
+                    mf.mesh = m_HexMesh;
+                }
+                else
+                {
+                    // recenter
+                    Vector3 minV = verts[0];
+                    Vector3 maxV = verts[0];
+                    for (int j = 1; j < verts.Length; j++)
+                    {
+                        if (verts[j].x < minV.x)
+                        {
+                            minV.x = verts[j].x;
+                        }
+                        if (verts[j].y < minV.y)
+                        {
+                            minV.y = verts[j].y;
+                        }
+                        if (verts[j].x > maxV.x)
+                        {
+                            maxV.x = verts[j].x;
+                        }
+                        if (verts[j].y > maxV.y)
+                        {
+                            maxV.y = verts[j].y;
+                        }
+                    }
+                    Vector3 ctr = (minV + maxV) * 0.5f;
+                    for (int j = 0; j < verts.Length; j++)
+                    {
+                        verts[j] -= ctr;
+                    }
+
+                    mf.mesh.vertices = verts;
+                    mf.mesh.uv = uvs;
+                    mf.mesh.uv2 = uv2s;
+                    mf.mesh.normals = norms;
+                    mf.mesh.triangles = fs;
+
+                    m_HexMesh = mf.mesh;
+                }
                 go.transform.SetParent(hexParent.transform, false);
+                go.transform.localPosition = hexPos;
 
                 SetDecal(hex);
             }
@@ -296,20 +338,6 @@ public class HexMapBuilder : MonoBehaviour
         }
         else
         {
-            //string bitsStr = Bits(index);
-            //string path = m_HexMapResourcePath + bitsStr;
-            //Texture2D hexTexture = null;
-            //if (m_HexTextures.ContainsKey(path))
-            //{
-            //    hexTexture = m_HexTextures[path];
-            //}
-            //else
-            //{
-            //    hexTexture = Resources.Load<Texture2D>(path);
-            //    m_HexTextures[path] = hexTexture;
-            //}
-            //hex.HexMaterial.SetTexture(m_TexturePropertyName, hexTexture);
-
             int ix = index & 0x0f;
             int iy = (index & 0xf0) >> 4;
             float ox = (float)ix / 16.0f;
