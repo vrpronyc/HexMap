@@ -5,6 +5,8 @@ using UnityEngine;
 public class HexMapManager : MonoBehaviour
 {
     public const float COS_30 = 0.86602540378443864676372317075294f;
+    public const float HALF_COS_30 = 0.43301270189221932338186158537647f;
+    public const float HALF_COS_30_SQ = 0.1875f;
 
     public int m_Height = 10;
     public int m_Width = 12;

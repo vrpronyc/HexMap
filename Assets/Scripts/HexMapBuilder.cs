@@ -15,6 +15,10 @@ public class HexMapBuilder : MonoBehaviour
     Hex[][] m_Hexes;
     HexPoint[][] m_HexPoints;
 
+    Vector3 m_HexMapMin;
+    Vector3 m_HexMapMax;
+    Vector3 m_HexMapZero;
+
     //HexPointType[][] m_HexPointType;
 
     /// <summary>
@@ -30,6 +34,28 @@ public class HexMapBuilder : MonoBehaviour
     ///            1------3    5     7------9
     /// Row C     /        \        /        \
     ///          0    2     4------6    8     10 
+    ///
+    ///
+    ///               1-----2
+    /// Hex Point    /       \ 
+    /// Order       0    6    3
+    ///              \       / 
+    ///               4-----5 
+    ///
+    /// 
+    ///                 m_Scale
+    ///               |---------|
+    ///                 1-----2   ---
+    /// Dimensions     /       \   |
+    ///               0    6    3  | Cos(30) * m_Scale
+    ///                \       /   |
+    ///                 4-----5   ---
+    ///               |-|-------|-|
+    ///              Rise   |   Drop
+    ///                    Run 
+    ///                    
+    ///              Rise, Drop = m_Scale * 0.25f ;
+    ///              Run = m_Scale * 0.5f ;
     /// </summary>
 
     public int m_Width = 12;
@@ -42,10 +68,17 @@ public class HexMapBuilder : MonoBehaviour
     public Transform m_HexTexQuadTransform;
     public string m_TexturePropertyName = "_DecalTex";
 
+    const float RISE_DROP = 0.25f;
+    const float RUN = 0.5f;
+
     Mesh m_HexMesh = null;
 
     Dictionary<string, Texture2D> m_HexTextures = new Dictionary<string, Texture2D>();
 
+    public Transform m_TraceBox;
+    public Transform m_TraceSphere;
+
+    public bool m_DBG = false;
     static string Bits(int i)
     {
         StringBuilder sb = new StringBuilder();
@@ -142,6 +175,12 @@ public class HexMapBuilder : MonoBehaviour
                 m_HexPoints[iy][ix].go = go;
             }
         }
+
+        float minX = m_HexPoints[0][0].position.x;
+        float minY = m_HexPoints[m_HeightCount - 1][0].position.y;
+
+        m_HexMapMin = new Vector3(minX, minY, 0);
+        m_HexMapZero = m_HexPoints[0][2].position;
 
         GameObject hexParent = new GameObject();
         hexParent.name = "Hexes";
@@ -313,6 +352,8 @@ public class HexMapBuilder : MonoBehaviour
                 go.transform.localPosition = hexPos;
 
                 SetDecal(hex);
+
+                m_Hexes[iy][ix] = hex;
             }
         }
 
@@ -358,10 +399,102 @@ public class HexMapBuilder : MonoBehaviour
 
         float uOffset = 0.5f;
 
+        m_HexTexQuadTransform.localPosition = new Vector3(RISE_DROP, -(HexMapManager.COS_30 * 0.5f), 0f);
         m_HexTexQuadTransform.localScale = new Vector3(xScl, yScl, 1.0f);
         MeshRenderer mr = m_HexTexQuadTransform.GetComponent<MeshRenderer>();
         mr.material.SetTextureOffset("_MainTex", new Vector2(uOffset, 0.0f));
         mr.material.SetTextureScale("_MainTex", new Vector2(uTile, vTile));
+    }
+
+    Hex FetchHex(Vector3 samplePoint)
+    {
+        Hex hexHit = null;
+
+        Vector3 flippedPnt = new Vector3(samplePoint.x, -samplePoint.y, samplePoint.z);
+
+        Vector3 pnt = flippedPnt - m_HexMapMin;
+        pnt = pnt - new Vector3(RISE_DROP, HexMapManager.HALF_COS_30, 0);
+
+        int ix = (int)(pnt.x / 0.75f);
+        int iy = 0;
+        if ((ix & 0x01) == 0x01)
+        {
+            iy = (int)((pnt.y - HexMapManager.HALF_COS_30) / HexMapManager.COS_30);
+        }
+        else
+        {
+            iy = (int)(pnt.y / HexMapManager.COS_30);
+        }
+
+        if (m_DBG)
+        {
+            Debug.Log($"pnt {pnt.x.ToString("R")},{pnt.y.ToString("R")} i {ix.ToString()},{iy.ToString()}");
+        }
+
+        if ((iy >= 0)
+            && (iy < m_Height)
+            && (ix >= 0)
+            && (ix < m_Width)
+            )
+        {
+            if (iy >= m_Hexes.Length)
+            {
+                if (m_DBG)
+                {
+                    Debug.Log($"iy {iy.ToString()} m_Hexes.Length {m_Hexes.Length.ToString()}");
+                }
+                return hexHit;
+            }
+
+            if (ix >= m_Hexes[iy].Length)
+            {
+                if (m_DBG)
+                {
+                    Debug.Log($"ix {ix.ToString()} m_Hexes[{iy.ToString()}].Length {m_Hexes[iy].Length.ToString()}");
+                }
+                return hexHit;
+            }
+
+            if (m_Hexes[iy][ix] == null)
+            {
+                if (m_DBG)
+                {
+                    Debug.Log($"Null Hex at {ix.ToString()},{iy.ToString()}");
+                }
+                return hexHit;
+            }
+            if (m_Hexes[iy][ix].m_Indeces == null)
+            {
+                if (m_DBG)
+                {
+                    Debug.Log($"Null Indeces {ix.ToString()},{iy.ToString()}");
+                }
+                return hexHit;
+            }
+            if (m_Hexes[iy][ix].m_Indeces.Length < 7)
+            {
+                if (m_DBG)
+                {
+                    Debug.Log($"Indeces Length {ix.ToString()},{iy.ToString()} len {m_Hexes[iy][ix].m_Indeces.Length.ToString()}");
+                }
+                return hexHit;
+            }
+            Hex.HexIndex hi = m_Hexes[iy][ix].m_Indeces[6];
+
+            ix = hi.ix;
+            iy = hi.iy;
+
+            if (m_DBG)
+            {
+                Debug.Log($"hi {ix.ToString()},{iy.ToString()}");
+            }
+
+
+            Vector3 ctr = m_HexPoints[iy][ix].position;
+            m_TraceBox.position = ctr;
+        }
+
+        return hexHit;
     }
     // Start is called before the first frame update
     void Start()
@@ -372,6 +505,19 @@ public class HexMapBuilder : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        float s = -(ray.origin.z / ray.direction.z); // finding where z=0 is in x and y
+
+        Vector3 pos = new Vector3(ray.origin.x + (ray.direction.x * s),
+                                  ray.origin.y + (ray.direction.y * s),
+                                  0);
+
+        if(m_DBG)
+        {
+            Debug.Log($"Pos {pos.ToString("R")}");
+        }
+        m_TraceSphere.position = pos;
+
+        FetchHex(pos);
     }
 }
