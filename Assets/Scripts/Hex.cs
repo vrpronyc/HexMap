@@ -33,6 +33,12 @@ public class Hex : MonoBehaviour
     public Hex[] m_Neighbor = new Hex[7] { null, null, null, null, null, null, null };
     public HexIndex[] m_Indeces = new HexIndex[7];
     public Renderer m_Renderer;
+    public MaterialPropertyBlock m_Block;
+
+    public Vector4 m_TextureST;
+    public Color m_Color = Color.white;
+    public Vector4 m_BlockTextureST;
+    public Color m_BlockColor = Color.white;
 
     public Material m_HexMaterial;
     public Material HexMaterial
@@ -75,6 +81,16 @@ public class Hex : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if ((m_BlockColor != m_Color)
+            || (m_BlockTextureST != m_TextureST)
+            )
+        { 
+            m_Block = new MaterialPropertyBlock();
+            m_Block.SetVector("_MainTex_ST", m_TextureST);
+            m_Block.SetColor("_Color", m_Color);
+            m_Renderer.SetPropertyBlock(m_Block);
+            m_BlockColor = m_Color;
+            m_BlockTextureST = m_TextureST;
+        }
     }
 }

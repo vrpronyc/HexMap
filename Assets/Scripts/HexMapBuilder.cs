@@ -8,6 +8,7 @@ public class HexMapBuilder : MonoBehaviour
 
     public string m_HexMapResourcePath = "HexMap_";
     public Texture2D m_SourceTexture;
+    public Color m_DefaultColor = Color.white;
     public Material m_SeaMtl;
     public Material m_LandMtl;
     public Material m_HexMtl;
@@ -384,9 +385,12 @@ public class HexMapBuilder : MonoBehaviour
             float ox = (float)ix / 16.0f;
             float oy = (float)(7 - iy) / 8.0f;
             MaterialPropertyBlock block = new MaterialPropertyBlock();
-            block.SetVector("_MainTex_ST", new Vector4(0.0625f, 0.125f, ox, oy));
+            hex.m_TextureST = new Vector4(0.0625f, 0.125f, ox, oy);
+            block.SetVector("_MainTex_ST", hex.m_TextureST);
+            block.SetColor("_Color", m_DefaultColor);
+            hex.m_Color = m_DefaultColor;
             hex.m_Renderer.SetPropertyBlock(block);
-
+            hex.m_Block = block;
         }
     }
     void ConfigureQuad()

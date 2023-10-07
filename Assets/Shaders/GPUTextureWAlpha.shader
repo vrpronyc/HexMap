@@ -4,6 +4,7 @@ Shader "GPUTextureWAlpha"
 {
 	Properties
 	{
+		_Color("Color", Color) = (0,0,0,0)
 		_Cutoff( "Mask Clip Value", Float ) = 0.5
 		_MainTex("MainTex", 2D) = "white" {}
 		_MainTex_ST ("Main Scale (XY) Offset (ZW)", Vector) = (1,1,0,0)
@@ -28,16 +29,18 @@ Shader "GPUTextureWAlpha"
 
 		uniform sampler2D _MainTex;
       UNITY_INSTANCING_BUFFER_START(Props)
+	  	UNITY_DEFINE_INSTANCED_PROP(float4, _Color)
         UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
       UNITY_INSTANCING_BUFFER_END(Props)
 		uniform float _Cutoff = 0.5;
 
 		void surf( Input i , inout SurfaceOutputStandard o )
 		{
+			float4 _Color_Instance = UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
 			float4 scaleOffset = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST);
 			float2 uv_MainTex = i.uv_texcoord * scaleOffset.xy + scaleOffset.zw;
 			float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
-			o.Emission = tex2DNode1.rgb;
+			o.Emission = tex2DNode1.rgb * _Color_Instance;
 			o.Alpha = 1;
 			clip( tex2DNode1.a - _Cutoff );
 		}
