@@ -15,6 +15,7 @@ using UnityEngine;
 /// </summary>
 public class Hex : MonoBehaviour
 {
+    public enum HexVisibility { Undefined, Unknown, Known, Discovered };
     public class HexIndex
     {
         public int ix;
@@ -30,6 +31,7 @@ public class Hex : MonoBehaviour
             iy = y;
         }
     };
+    public HexVisibility m_HexVisibility = HexVisibility.Undefined;
     public Hex[] m_Neighbor = new Hex[7] { null, null, null, null, null, null, null };
     public HexIndex[] m_Indeces = new HexIndex[7];
     public Renderer m_Renderer;
@@ -39,6 +41,11 @@ public class Hex : MonoBehaviour
     public Color m_Color = Color.white;
     public Vector4 m_BlockTextureST;
     public Color m_BlockColor = Color.white;
+
+    int m_UnknownLayer = 0;
+    int m_KnownLayer = 0;
+    int m_DiscoveredLayer = 0;
+
 
     public Material m_HexMaterial;
     public Material HexMaterial
@@ -54,11 +61,37 @@ public class Hex : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        m_UnknownLayer = LayerMask.NameToLayer(Hex.HexVisibility.Unknown.ToString());
+        m_KnownLayer = LayerMask.NameToLayer(Hex.HexVisibility.Known.ToString());
+        m_DiscoveredLayer = LayerMask.NameToLayer(Hex.HexVisibility.Discovered.ToString());
+
         m_Neighbor[6] = this;
     }
 
+    public void SetHexVisibility(HexVisibility vis)
+    {
+        if (m_HexVisibility != vis)
+        {
+            m_HexVisibility = vis;
+            switch (vis)
+            {
+                case HexVisibility.Unknown:
+                    gameObject.layer = m_UnknownLayer;
+                    break;
+                case HexVisibility.Known:
+                    gameObject.layer = m_KnownLayer;
+                    break;
+                case HexVisibility.Discovered:
+                    gameObject.layer = m_DiscoveredLayer;
+                    break;
+                default:
+                    break;
+            }
+            Debug.Log($"layer in {vis.ToString()} obj layer {gameObject.layer.ToString()}");
+        }
+    }
     public void SetHexIndeces(HexIndex[] hexIndecies)
     {
         for (int i = 0; i < hexIndecies.Length; i++)

@@ -9,6 +9,7 @@ public class HexMapBuilder : MonoBehaviour
     public string m_HexMapResourcePath = "HexMap_";
     public Texture2D m_SourceTexture;
     public Color m_DefaultColor = Color.white;
+    public Color m_SeaColor = Color.blue;
     public Material m_SeaMtl;
     public Material m_LandMtl;
     public Material m_HexMtl;
@@ -80,6 +81,7 @@ public class HexMapBuilder : MonoBehaviour
     public Transform m_TraceSphere;
 
     public bool m_DBG = false;
+
     static string Bits(int i)
     {
         StringBuilder sb = new StringBuilder();
@@ -352,6 +354,8 @@ public class HexMapBuilder : MonoBehaviour
                 go.transform.SetParent(hexParent.transform, false);
                 go.transform.localPosition = hexPos;
 
+                hex.SetHexVisibility(Hex.HexVisibility.Unknown);
+
                 SetDecal(hex);
 
                 m_Hexes[iy][ix] = hex;
@@ -376,7 +380,16 @@ public class HexMapBuilder : MonoBehaviour
 
         if (index == 0)
         {
-            hex.m_Renderer.enabled = false;
+            //hex.m_Renderer.enabled = false;
+            float ox = 0.9375f;
+            float oy = 0.0f;
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            hex.m_TextureST = new Vector4(0.0625f, 0.125f, ox, oy);
+            block.SetVector("_MainTex_ST", hex.m_TextureST);
+            block.SetColor("_Color", m_SeaColor);
+            hex.m_Color = m_SeaColor;
+            hex.m_Renderer.SetPropertyBlock(block);
+            hex.m_Block = block;
         }
         else
         {
@@ -408,6 +421,7 @@ public class HexMapBuilder : MonoBehaviour
         MeshRenderer mr = m_HexTexQuadTransform.GetComponent<MeshRenderer>();
         mr.material.SetTextureOffset("_MainTex", new Vector2(uOffset, 0.0f));
         mr.material.SetTextureScale("_MainTex", new Vector2(uTile, vTile));
+
     }
 
     Hex FetchHex(Vector3 samplePoint)
@@ -485,6 +499,8 @@ public class HexMapBuilder : MonoBehaviour
             }
             Hex.HexIndex hi = m_Hexes[iy][ix].m_Indeces[6];
 
+            hexHit = m_Hexes[iy][ix];
+
             ix = hi.ix;
             iy = hi.iy;
 
@@ -522,6 +538,10 @@ public class HexMapBuilder : MonoBehaviour
         }
         m_TraceSphere.position = pos;
 
-        FetchHex(pos);
+        Hex hex = FetchHex(pos);
+        if (hex != null)
+        {
+            hex.SetHexVisibility(Hex.HexVisibility.Known);
+        }
     }
 }
