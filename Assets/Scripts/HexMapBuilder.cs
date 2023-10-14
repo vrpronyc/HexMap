@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class HexMapBuilder : MonoBehaviour
 {
+    static HexMapBuilder m_instance;
+    public static HexMapBuilder Instance
+    {
+        get 
+        { 
+            return m_instance; 
+        }
+    }
 
     public string m_HexMapResourcePath = "HexMap_";
     public Texture2D m_SourceTexture;
@@ -80,8 +88,24 @@ public class HexMapBuilder : MonoBehaviour
     public Transform m_TraceBox;
     public Transform m_TraceSphere;
 
+    public Transform m_NullHexPicked;
+    public Transform m_HexPicked;
+
+    public float m_HexNeighborDwellTime = 0.1f;
+
     public bool m_DBG = false;
 
+    private void Awake()
+    {
+        if (m_instance != null && m_instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            m_instance = this;
+        }
+    }
     static string Bits(int i)
     {
         StringBuilder sb = new StringBuilder();
@@ -123,7 +147,7 @@ public class HexMapBuilder : MonoBehaviour
             m_Hexes[i] = new Hex[m_Width];
         }
 
-        float maxHeight = mapHeight * 0.5f ;
+        float maxHeight = mapHeight * 0.5f;
         float xOffset = -mapWidth * 0.5f * m_Scale;
 
         GameObject pntParent = new GameObject();
@@ -162,20 +186,20 @@ public class HexMapBuilder : MonoBehaviour
                     }
                 }
 
-                GameObject go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                go.name = string.Format("pnt_{0:D2}_{1:D2}", iy, ix);
-                Collider collider = go.GetComponent<Collider>();
-                if (collider != null)
-                {
-                    Destroy(collider);
-                }
-                go.transform.localScale = Vector3.one * 0.1f;
-                go.transform.position = m_HexPoints[iy][ix].position + new Vector3(0, 0, -0.01f); ;
-                go.transform.SetParent(pntParent.transform, false);
+                //GameObject go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                //go.name = string.Format("pnt_{0:D2}_{1:D2}", iy, ix);
+                //Collider collider = go.GetComponent<Collider>();
+                //if (collider != null)
+                //{
+                //    Destroy(collider);
+                //}
+                //go.transform.localScale = Vector3.one * 0.1f;
+                //go.transform.position = m_HexPoints[iy][ix].position + new Vector3(0, 0, -0.01f); ;
+                //go.transform.SetParent(pntParent.transform, false);
 
-                MeshRenderer mr = go.GetComponent<MeshRenderer>();
-                mr.material = (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land ? m_LandMtl : m_SeaMtl) ;
-                m_HexPoints[iy][ix].go = go;
+                //MeshRenderer mr = go.GetComponent<MeshRenderer>();
+                //mr.material = (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land ? m_LandMtl : m_SeaMtl) ;
+                //m_HexPoints[iy][ix].go = go;
             }
         }
 
@@ -291,9 +315,11 @@ public class HexMapBuilder : MonoBehaviour
                         HexPoint.HexPointType hpt = (c.r < 0.5f ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
                         m_HexPoints[hexIndices[iuv].iy][hexIndices[iuv].ix].hexPointType = hpt;
                         GameObject hexGo = m_HexPoints[iy][ix].go;
-                        MeshRenderer mr = hexGo.GetComponent<MeshRenderer>();
-                        mr.material = (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land ? m_LandMtl : m_SeaMtl);
-
+                        if (hexGo != null)
+                        {
+                            MeshRenderer mr = hexGo.GetComponent<MeshRenderer>();
+                            mr.material = (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land ? m_LandMtl : m_SeaMtl);
+                        }
                     }
 
                 }
@@ -358,20 +384,90 @@ public class HexMapBuilder : MonoBehaviour
 
                 SetDecal(hex);
 
+                hex.m_ThisHexIndex = new Hex.HexIndex(ix, iy);
                 m_Hexes[iy][ix] = hex;
             }
         }
 
+        SetHexNeighbors();
+
         ConfigureQuad();
     }
 
+    void SetHexNeighbors()
+    {
+        for (int iy = 0; iy < m_Height; iy++)
+        {
+            for (int ix = 0; ix < m_Width; ix++)
+            {
+                Hex[] neighbors = new Hex[6];
+                for (int i = 0; i < neighbors.Length; i++)
+                {
+                    neighbors[i] = null;
+                    if ((ix & 0x01) == 0x01)
+                    {
+                        neighbors[0] = m_Hexes[iy][ix - 1];
+                        if (iy > 0)
+                        {
+                            neighbors[1] = m_Hexes[iy - 1][ix];
+                        }
+                        if (ix < (m_Hexes[iy].Length - 1))
+                        {
+                            neighbors[2] = m_Hexes[iy][ix + 1];
+                        }
+                        if (iy < (m_Hexes.Length - 1))
+                        {
+                            if (ix < (m_Hexes[iy + 1].Length - 1))
+                            {
+                                neighbors[3] = m_Hexes[iy + 1][ix + 1];
+                            }
+                            neighbors[4] = m_Hexes[iy + 1][ix];
+                            neighbors[5] = m_Hexes[iy + 1][ix - 1];
+                        }
+                    }
+                    else
+                    {
+                        if (ix > 0)
+                        {
+                            if (iy > 0)
+                            {
+                                neighbors[0] = m_Hexes[iy - 1][ix - 1];
+                            }
+                        }
+                        if (iy > 0)
+                        {
+                            neighbors[1] = m_Hexes[iy - 1][ix];
+                            if (ix < (m_Hexes[iy - 1].Length - 1))
+                            {
+                                neighbors[2] = m_Hexes[iy - 1][ix + 1];
+                            }
+                        }
+                        if (ix < (m_Hexes[iy].Length - 1))
+                        {
+                            neighbors[3] = m_Hexes[iy][ix + 1];
+                        }
+                        if (iy < (m_Hexes.Length - 1))
+                        {
+                            neighbors[4] = m_Hexes[iy + 1][ix];
+                        }
+                        if (ix > 0)
+                        {
+                            neighbors[5] = m_Hexes[iy][ix - 1];
+                        }
+                    }
+                }
+
+                m_Hexes[iy][ix].SetNeighbors(neighbors);
+            }
+        }
+    }
     void SetDecal(Hex hex)
     {
         int index = 0;
-        for (int i = 0; i < hex.m_Indeces.Length; i++)
+        for (int i = 0; i < hex.m_HexPointIndeces.Length; i++)
         {
-            int ix = hex.m_Indeces[i].ix;
-            int iy = hex.m_Indeces[i].iy;
+            int ix = hex.m_HexPointIndeces[i].ix;
+            int iy = hex.m_HexPointIndeces[i].iy;
             if (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
             {
                 index = index | (0x01 << i);
@@ -422,6 +518,13 @@ public class HexMapBuilder : MonoBehaviour
         mr.material.SetTextureOffset("_MainTex", new Vector2(uOffset, 0.0f));
         mr.material.SetTextureScale("_MainTex", new Vector2(uTile, vTile));
 
+    }
+
+    public Hex FetchHexFromClickPoint()
+    {
+        Vector3 pos = GetPickPoint();
+        Hex hex = FetchHex(pos);
+        return hex;
     }
 
     Hex FetchHex(Vector3 samplePoint)
@@ -481,7 +584,7 @@ public class HexMapBuilder : MonoBehaviour
                 }
                 return hexHit;
             }
-            if (m_Hexes[iy][ix].m_Indeces == null)
+            if (m_Hexes[iy][ix].m_HexPointIndeces == null)
             {
                 if (m_DBG)
                 {
@@ -489,15 +592,15 @@ public class HexMapBuilder : MonoBehaviour
                 }
                 return hexHit;
             }
-            if (m_Hexes[iy][ix].m_Indeces.Length < 7)
+            if (m_Hexes[iy][ix].m_HexPointIndeces.Length < 7)
             {
                 if (m_DBG)
                 {
-                    Debug.Log($"Indeces Length {ix.ToString()},{iy.ToString()} len {m_Hexes[iy][ix].m_Indeces.Length.ToString()}");
+                    Debug.Log($"Indeces Length {ix.ToString()},{iy.ToString()} len {m_Hexes[iy][ix].m_HexPointIndeces.Length.ToString()}");
                 }
                 return hexHit;
             }
-            Hex.HexIndex hi = m_Hexes[iy][ix].m_Indeces[6];
+            Hex.HexIndex hi = m_Hexes[iy][ix].m_HexPointIndeces[6];
 
             hexHit = m_Hexes[iy][ix];
 
@@ -516,14 +619,71 @@ public class HexMapBuilder : MonoBehaviour
 
         return hexHit;
     }
-    // Start is called before the first frame update
+
+    public void OnMouseDown()
+    {
+        Vector3 pos = GetPickPoint();
+        Debug.Log($"OnHexClick {pos.ToString("R")}");
+        Hex hex = FetchHex(pos);
+        if (hex != null)
+        {
+            StartCoroutine(ShowNeighbors(hex));
+        }
+        else
+        {
+            Debug.Log($"OnHexClick NO HEX");
+        }
+    }
+
+    Vector3 GetHexPos(Hex hex)
+    {
+        Hex.HexIndex hi = hex.m_HexPointIndeces[6];
+
+        int ix = hi.ix;
+        int iy = hi.iy;
+
+        Vector3 ctr = m_HexPoints[iy][ix].position;
+        return ctr;
+    }
+    IEnumerator ShowNeighbors(Hex hex)
+    {
+        Vector3 ctr = GetHexPos(hex);
+
+        m_NullHexPicked.position = ctr;
+        m_NullHexPicked.gameObject.SetActive(false);
+
+        Debug.Log($"Hex {hex.m_ThisHexIndex.ix.ToString()},{hex.m_ThisHexIndex.iy.ToString()}");
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (hex.m_Neighbor[i] == null)
+            {
+                Debug.Log($"N {i.ToString()}: NULL");
+                m_HexPicked.gameObject.SetActive(false);
+                m_NullHexPicked.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.Log($"N {i.ToString()}: {hex.m_Neighbor[i].m_ThisHexIndex.ix.ToString()},{hex.m_Neighbor[i].m_ThisHexIndex.iy.ToString()}");
+                ctr = GetHexPos(hex.m_Neighbor[i]);
+                m_HexPicked.position = ctr;
+                m_HexPicked.gameObject.SetActive(true);
+                m_NullHexPicked.gameObject.SetActive(false);
+            }
+            yield return new WaitForSeconds(m_HexNeighborDwellTime);
+            m_HexPicked.gameObject.SetActive(false);
+            m_NullHexPicked.gameObject.SetActive(false);
+            yield return new WaitForSeconds(m_HexNeighborDwellTime);
+        }
+        yield return 0;
+    }
+
     void Start()
     {
         BuildMap();
     }
 
-    // Update is called once per frame
-    void Update()
+    Vector3 GetPickPoint()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         float s = -(ray.origin.z / ray.direction.z); // finding where z=0 is in x and y
@@ -531,17 +691,21 @@ public class HexMapBuilder : MonoBehaviour
         Vector3 pos = new Vector3(ray.origin.x + (ray.direction.x * s),
                                   ray.origin.y + (ray.direction.y * s),
                                   0);
-
-        if(m_DBG)
+        return pos;
+    }
+    void Update()
+    {
+        Vector3 pos = GetPickPoint();
+        if (m_DBG)
         {
             Debug.Log($"Pos {pos.ToString("R")}");
         }
         m_TraceSphere.position = pos;
 
-        Hex hex = FetchHex(pos);
-        if (hex != null)
-        {
-            hex.SetHexVisibility(Hex.HexVisibility.Known);
-        }
+        //Hex hex = FetchHex(pos);
+        //if (hex != null)
+        //{
+        //    hex.SetHexVisibility(Hex.HexVisibility.Known);
+        //}
     }
 }
