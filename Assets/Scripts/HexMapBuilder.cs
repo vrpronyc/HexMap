@@ -120,6 +120,10 @@ public class HexMapBuilder : MonoBehaviour
 
     public float m_HexNeighborDwellTime = 0.1f;
 
+    public Hex m_Home;
+    public Hex.HexIndex m_HomeIndex;
+    public Color m_HomeColor = Color.gray;
+
     public bool m_DBG = false;
 
     private void Awake()
@@ -198,6 +202,55 @@ public class HexMapBuilder : MonoBehaviour
         }
 
         return count;
+    }
+
+    void GenerateHome(int ix)
+    {
+        Hex.HexIndex homeIndex = new Hex.HexIndex(ix, m_Height - 1);
+
+        int visCount = 0;
+        // start with land
+        Hex hex = m_Hexes[m_Height - 1][ix];
+        for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
+        {
+            Hex.HexIndex hi = hex.m_HexPointIndeces[e];
+            m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Land;
+        }
+        hex.SetHexVisibility(Hex.HexVisibility.Known);
+        // set neighbors to land
+        for (int i = 0; i < hex.m_Neighbor.Length; i++)
+        {
+            if(hex.m_Neighbor[i] != null)
+            {
+                Hex neighbor = hex.m_Neighbor[i];
+                Hex.HexIndex hi = neighbor.m_HexPointIndeces[CENTER_INDEX];
+                m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Land;
+                neighbor.SetHexVisibility(Hex.HexVisibility.Known);
+                visCount++;
+                if (visCount == 2)
+                {
+                    homeIndex = neighbor.m_ThisHexIndex;
+                    m_Home = neighbor;
+                }
+            }
+        }
+        for (int i = 0; i < hex.m_Neighbor.Length; i++)
+        {
+            if (hex.m_Neighbor[i] != null)
+            {
+                Hex neighbor = hex.m_Neighbor[i];
+                for (int j = 0; j < neighbor.m_Neighbor.Length; j++)
+                {
+                    Hex neighborsNeighbor = neighbor.m_Neighbor[j];
+                    if (neighborsNeighbor != null)
+                    {
+                        neighborsNeighbor.SetHexVisibility(Hex.HexVisibility.Known);
+                    }
+                }
+            }
+        }
+
+        m_HomeIndex = homeIndex;
     }
     void GenerateIslands()
     {
@@ -587,6 +640,11 @@ public class HexMapBuilder : MonoBehaviour
         {
             GenerateIslands(); 
         }
+
+        SetHexNeighbors();
+
+        GenerateHome(m_Width / 2);
+
         for (int iy = 0; iy < m_Height; iy++)
         {
             for (int ix = 0; ix < m_Width; ix++)
@@ -594,8 +652,8 @@ public class HexMapBuilder : MonoBehaviour
                 SetDecal(m_Hexes[iy][ix]);
             }
         }
-
-        SetHexNeighbors();
+        m_Hexes[m_HomeIndex.iy][m_HomeIndex.ix].m_Color = m_HomeColor;
+        NavigationController.Instance.StartPath(m_Home);
 
         ConfigureQuad();
     }

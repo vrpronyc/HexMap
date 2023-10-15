@@ -4,6 +4,26 @@ using UnityEngine;
 
 public class NavigationController : MonoBehaviour
 {
+    static NavigationController m_instance;
+    public static NavigationController Instance
+    {
+        get
+        {
+            return m_instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if (m_instance != null && m_instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            m_instance = this;
+        }
+    }
     public enum NavigationState { Undef, Plotting, Sailing };
     public NavigationState m_NavigationState = NavigationState.Undef;
 
@@ -39,6 +59,11 @@ public class NavigationController : MonoBehaviour
         
     }
 
+    public void StartPath(Hex hex)
+    {
+        ClearPath();
+        AddHexToPath(hex);
+    }
     bool HexIsValid(Hex hex)
     {
         if (hex == null)

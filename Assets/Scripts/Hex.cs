@@ -26,6 +26,8 @@ using UnityEngine;
 public class Hex : MonoBehaviour
 {
     public enum HexVisibility { Undefined, Unknown, Known, Discovered };
+
+    [System.Serializable]
     public class HexIndex
     {
         public int ix;
