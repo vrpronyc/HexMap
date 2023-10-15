@@ -60,6 +60,38 @@ public class Hex : MonoBehaviour
         new HexIndexPair(6, 5),
         new HexIndexPair(5, 0),
     };
+
+    public class HexPointNeighborIndex
+    {
+        public int neighborA;
+        public int nApt0;
+        public int nApt1;
+        public int nApt2;
+        public int neighborB;
+        public int nBpt0;
+        public int nBpt1;
+        public HexPointNeighborIndex(int nA, int nA0, int nA1, int nA2, int nB, int nB0, int nB1)
+        {
+            neighborA = nA;
+            nApt0 = nA0;
+            nApt1 = nA1;
+            nApt2 = nA2;
+            neighborB = nB;
+            nBpt0 = nB0;
+            nBpt1 = nB1;
+        }
+    }
+    public HexPointNeighborIndex[] m_HexPointNeighbors = new HexPointNeighborIndex[]
+    {
+        new HexPointNeighborIndex(0, 1, 2, 4, 5, 2, 4),
+        new HexPointNeighborIndex(1, 6, 2, 3, 1, 2, 6),
+        new HexPointNeighborIndex(-1, 0, 1, 3, -1, 4, 5),
+        new HexPointNeighborIndex(1, 5, 2, 4, 2, 2, 4),
+        new HexPointNeighborIndex(2, 0, 2, 6, 3, 0, 2),
+        new HexPointNeighborIndex(5, 2, 3, 6, 4, 2, 3),
+        new HexPointNeighborIndex(3, 1, 2, 5, 4, 1, 2),
+    };
+
     public HexVisibility m_HexVisibility = HexVisibility.Undefined;
     public Hex[] m_Neighbor = new Hex[7] { null, null, null, null, null, null, null };
     public int[] m_TransitionCost = new int[] { 0, 0, 0, 0, 0, };

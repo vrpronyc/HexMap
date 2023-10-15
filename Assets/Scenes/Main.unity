@@ -979,6 +979,133 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+--- !u!1 &740631222
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 740631224}
+  - component: {fileID: 740631223}
+  m_Layer: 0
+  m_Name: HexMapBuilder (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &740631223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740631222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9a1db3ea45b1574eb2b8a794963bb83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HexBuildPasses:
+  - m_HexLandProbability: 0.01
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0
+    m_HexEdge2NeighborsProbability: 0
+    m_HexEdge3NeighborsProbability: 0
+    m_HexEdge4NeighborsProbability: 0
+    m_HexEdge5NeighborsProbability: 0
+    m_HexEdge6NeighborsProbability: 0
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.083333336
+    m_HexEdge2NeighborsProbability: 0
+    m_HexEdge3NeighborsProbability: 0
+    m_HexEdge4NeighborsProbability: 0
+    m_HexEdge5NeighborsProbability: 0
+    m_HexEdge6NeighborsProbability: 0
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.1
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.1
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.1
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.1
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.1
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0.02
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.1
+  m_HexMapResourcePath: HexMap_
+  m_SourceTexture: {fileID: 0}
+  m_DefaultColor: {r: 0.8584906, g: 0.606466, b: 0.028346404, a: 1}
+  m_SeaColor: {r: 0, g: 0, b: 1, a: 1}
+  m_SeaMtl: {fileID: 2100000, guid: 721e192cc9d92d64487cb87b830831ff, type: 2}
+  m_LandMtl: {fileID: 2100000, guid: dbf413dad2da1a94e8b8d3eb7e724af1, type: 2}
+  m_HexMtl: {fileID: 2100000, guid: 7de33b07486732c4ebc34632fd5d846d, type: 2}
+  m_Width: 100
+  m_Height: 50
+  m_Scale: 1
+  m_HexTexQuadTransform: {fileID: 1027298919}
+  m_TexturePropertyName: _MainTex
+  m_TraceBox: {fileID: 1232684195}
+  m_TraceSphere: {fileID: 1925507786}
+  m_NullHexPicked: {fileID: 998077675}
+  m_HexPicked: {fileID: 1284063111}
+  m_HexNeighborDwellTime: 1
+  m_DBG: 0
+--- !u!4 &740631224
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740631222}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 13
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &780743892
 GameObject:
   m_ObjectHideFlags: 0
@@ -1182,7 +1309,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1079
+    m_Bits: 3127
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1202,7 +1329,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2350,15 +2477,80 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9a1db3ea45b1574eb2b8a794963bb83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_HexBuildPasses:
+  - m_HexLandProbability: 0.01
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0
+    m_HexEdge2NeighborsProbability: 0
+    m_HexEdge3NeighborsProbability: 0
+    m_HexEdge4NeighborsProbability: 0
+    m_HexEdge5NeighborsProbability: 0
+    m_HexEdge6NeighborsProbability: 0
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.083333336
+    m_HexEdge2NeighborsProbability: 0
+    m_HexEdge3NeighborsProbability: 0
+    m_HexEdge4NeighborsProbability: 0
+    m_HexEdge5NeighborsProbability: 0
+    m_HexEdge6NeighborsProbability: 0
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.1
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.1
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.1
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.1
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.1
+    m_HexEdge6NeighborsProbability: 0.08333334
+  - m_HexLandProbability: 0.02
+    m_HexEdge0NeighborsProbability: 0
+    m_HexEdge1NeighborsProbability: 0.08333334
+    m_HexEdge2NeighborsProbability: 0.08333334
+    m_HexEdge3NeighborsProbability: 0.08333334
+    m_HexEdge4NeighborsProbability: 0.08333334
+    m_HexEdge5NeighborsProbability: 0.08333334
+    m_HexEdge6NeighborsProbability: 0.1
   m_HexMapResourcePath: HexMap_
-  m_SourceTexture: {fileID: 2800000, guid: 913e84174a585824f838ff7562580e96, type: 3}
+  m_SourceTexture: {fileID: 0}
   m_DefaultColor: {r: 0.8584906, g: 0.606466, b: 0.028346404, a: 1}
   m_SeaColor: {r: 0, g: 0, b: 1, a: 1}
   m_SeaMtl: {fileID: 2100000, guid: 721e192cc9d92d64487cb87b830831ff, type: 2}
   m_LandMtl: {fileID: 2100000, guid: dbf413dad2da1a94e8b8d3eb7e724af1, type: 2}
   m_HexMtl: {fileID: 2100000, guid: 7de33b07486732c4ebc34632fd5d846d, type: 2}
-  m_Width: 58
-  m_Height: 22
+  m_Width: 100
+  m_Height: 50
   m_Scale: 1
   m_HexTexQuadTransform: {fileID: 1027298919}
   m_TexturePropertyName: _MainTex

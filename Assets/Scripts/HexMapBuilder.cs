@@ -14,6 +14,32 @@ public class HexMapBuilder : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public class HexBuildPass
+    {
+        public float m_HexLandProbability = 0.01f;
+        public float m_HexEdge0NeighborsProbability = 0.0f;
+        public float m_HexEdge1NeighborsProbability = 0.0f;
+        public float m_HexEdge2NeighborsProbability = 0.0f;
+        public float m_HexEdge3NeighborsProbability = 0.0f;
+        public float m_HexEdge4NeighborsProbability = 0.0f;
+        public float m_HexEdge5NeighborsProbability = 0.0f;
+        public float m_HexEdge6NeighborsProbability = 0.0f;
+        public HexBuildPass()
+        {
+            m_HexLandProbability = 0.01f;
+            m_HexEdge0NeighborsProbability = 0.0f;
+            m_HexEdge1NeighborsProbability = 0.0f;
+            m_HexEdge2NeighborsProbability = 0.0f;
+            m_HexEdge3NeighborsProbability = 0.0f;
+            m_HexEdge4NeighborsProbability = 0.0f;
+            m_HexEdge5NeighborsProbability = 0.0f;
+            m_HexEdge6NeighborsProbability = 0.0f;
+        }
+    }
+
+    public List<HexBuildPass> m_HexBuildPasses;
+
     public string m_HexMapResourcePath = "HexMap_";
     public Texture2D m_SourceTexture;
     public Color m_DefaultColor = Color.white;
@@ -67,6 +93,7 @@ public class HexMapBuilder : MonoBehaviour
     ///              Rise, Drop = m_Scale * 0.25f ;
     ///              Run = m_Scale * 0.5f ;
     /// </summary>
+    const int CENTER_INDEX = 2;
 
     public int m_Width = 12;
     public int m_Height = 10;
@@ -125,6 +152,187 @@ public class HexMapBuilder : MonoBehaviour
         return sb.ToString();
     }
 
+    int CountNeighbors(int ix, int iy, int iPt)
+    {
+        int count = 0;
+        // 
+        Hex hex = m_Hexes[iy][ix];
+        Hex.HexPointNeighborIndex hni = hex.m_HexPointNeighbors[iPt];
+        Hex hexA = hex.m_Neighbor[hni.neighborA];
+        if (hexA != null)
+        {
+            Hex.HexIndex hiA = hexA.m_HexPointIndeces[hni.nApt0];
+            if (m_HexPoints[hiA.iy][hiA.ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                count++;
+            }
+            hiA = hexA.m_HexPointIndeces[hni.nApt1];
+            if (m_HexPoints[hiA.iy][hiA.ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                count++;
+            }
+            hiA = hexA.m_HexPointIndeces[hni.nApt2];
+            if (m_HexPoints[hiA.iy][hiA.ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                count++;
+            }
+        }
+        Hex hexB = hex.m_Neighbor[hni.neighborB];
+        if (hexB != null)
+        {
+            Hex.HexIndex hiB = hexB.m_HexPointIndeces[hni.nBpt0];
+            if (m_HexPoints[hiB.iy][hiB.ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                count++;
+            }
+            hiB = hexB.m_HexPointIndeces[hni.nBpt1];
+            if (m_HexPoints[hiB.iy][hiB.ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                count++;
+            }
+        }
+        Hex.HexIndex hi = hex.m_HexPointIndeces[CENTER_INDEX];
+        if (m_HexPoints[hi.iy][hi.ix].hexPointType == HexPoint.HexPointType.Land)
+        {
+            count++;
+        }
+
+        return count;
+    }
+    void GenerateIslands()
+    {
+        HexPoint.HexPointType[][] tempSea = new HexPoint.HexPointType[m_HeightCount][];
+        for (int iy = 0; iy < m_HeightCount; iy++)
+        {
+            tempSea[iy] = new HexPoint.HexPointType[m_WidthCount];
+        }
+        for (int pass = 0; pass < m_HexBuildPasses.Count; pass++)
+        {
+            for (int iy = 0; iy < m_HeightCount; iy++)
+            {
+                for (int ix = 0; ix < m_WidthCount; ix++)
+                {
+                    tempSea[iy][ix] = m_HexPoints[iy][ix].hexPointType;
+                }
+            }
+
+            for (int iy = 0; iy < m_Height; iy++)
+            {
+                for (int ix = 0; ix < m_Width; ix++)
+                {
+                    Hex.HexIndex hi = m_Hexes[iy][ix].m_HexPointIndeces[CENTER_INDEX];
+                    if ((hi.ix < 2) ||
+                        (hi.ix > (m_WidthCount - 3)) ||
+                        (hi.iy == 0) ||
+                        (hi.iy == (m_HeightCount - 1))
+                        )
+                    {
+                        tempSea[hi.iy][hi.ix] = HexPoint.HexPointType.Sea;
+                    }
+                    else
+                    {
+                        // First Hex Land probability
+                        if (pass == 0)
+                        {
+                            tempSea[hi.iy][hi.ix] = (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexLandProbability ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
+                        }
+                        else
+                        {
+                            if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexLandProbability)
+                            {
+                                tempSea[hi.iy][hi.ix] = HexPoint.HexPointType.Land;
+                            }
+                        }
+                        // now each edge point
+                        for (int e = 0; e < 7; e++)
+                        {
+                            if (e != CENTER_INDEX)
+                            {
+                                Hex.HexIndex hiE = m_Hexes[iy][ix].m_HexPointIndeces[e];
+                                // Now count neighbors
+                                int count = 0;
+                                if (tempSea[hi.iy][hi.ix] == HexPoint.HexPointType.Land)
+                                {
+                                    count = CountNeighbors(ix, iy, e);
+                                }
+                                if (count == 0)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge0NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                                else if (count == 1)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge1NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                                else if (count == 2)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge2NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                                else if (count == 3)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge3NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                                else if (count == 4)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge4NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                                else if (count == 5)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge5NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                                else if (count == 6)
+                                {
+                                    if (Random.Range(0.0f, 1.0f) < m_HexBuildPasses[pass].m_HexEdge6NeighborsProbability)
+                                    {
+                                        tempSea[hiE.iy][hiE.ix] = HexPoint.HexPointType.Land;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int iy = 0; iy < m_HeightCount; iy++)
+            {
+                for (int ix = 0; ix < m_WidthCount; ix++)
+                {
+                    m_HexPoints[iy][ix].hexPointType = tempSea[iy][ix];
+                }
+            }
+        }
+        //if ((ix < 2) ||
+        //    (ix > (m_WidthCount - 3)) ||
+        //    (iy == 0) ||
+        //    (iy == (m_HeightCount - 1))
+        //    )
+        //{
+        //    m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
+        //}
+        //else
+        //{
+        //    m_HexPoints[iy][ix].hexPointType = (Random.Range(0.0f, 1.0f) > 0.75f ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
+        //}
+
+    }
+
     public void BuildMap()
     {
         float xStep = m_Scale * 0.25f;
@@ -172,34 +380,20 @@ public class HexMapBuilder : MonoBehaviour
 
                 if (m_SourceTexture == null)
                 {
-                    if ((ix < 2) ||
-                        (ix > (m_WidthCount - 3)) ||
-                        (iy == 0) ||
-                        (iy == (m_HeightCount - 1))
-                        )
-                    {
-                        m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
-                    }
-                    else
-                    {
-                        m_HexPoints[iy][ix].hexPointType = (Random.Range(0.0f, 1.0f) > 0.75f ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
-                    }
+                    //if ((ix < 2) ||
+                    //    (ix > (m_WidthCount - 3)) ||
+                    //    (iy == 0) ||
+                    //    (iy == (m_HeightCount - 1))
+                    //    )
+                    //{
+                    //    m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
+                    //}
+                    //else
+                    //{
+                    //    m_HexPoints[iy][ix].hexPointType = (Random.Range(0.0f, 1.0f) > 0.75f ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
+                    //}
+                    m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
                 }
-
-                //GameObject go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                //go.name = string.Format("pnt_{0:D2}_{1:D2}", iy, ix);
-                //Collider collider = go.GetComponent<Collider>();
-                //if (collider != null)
-                //{
-                //    Destroy(collider);
-                //}
-                //go.transform.localScale = Vector3.one * 0.1f;
-                //go.transform.position = m_HexPoints[iy][ix].position + new Vector3(0, 0, -0.01f); ;
-                //go.transform.SetParent(pntParent.transform, false);
-
-                //MeshRenderer mr = go.GetComponent<MeshRenderer>();
-                //mr.material = (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land ? m_LandMtl : m_SeaMtl) ;
-                //m_HexPoints[iy][ix].go = go;
             }
         }
 
@@ -386,6 +580,18 @@ public class HexMapBuilder : MonoBehaviour
 
                 hex.m_ThisHexIndex = new Hex.HexIndex(ix, iy);
                 m_Hexes[iy][ix] = hex;
+            }
+        }
+
+        if (m_SourceTexture == null)
+        {
+            GenerateIslands(); 
+        }
+        for (int iy = 0; iy < m_Height; iy++)
+        {
+            for (int ix = 0; ix < m_Width; ix++)
+            {
+                SetDecal(m_Hexes[iy][ix]);
             }
         }
 
