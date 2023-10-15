@@ -26,7 +26,10 @@ public class HexQuadController : MonoBehaviour
 
     public void OnMouseDown()
     {
-        Debug.Log($"Got Mouse Down");
-        m_OnMouseDown.Invoke();
+        if (!CameraMover.Instance.IsPointerOverUIElement())
+        {
+            Debug.Log($"Got Mouse Down");
+            m_OnMouseDown.Invoke();
+        }
     }
 }
