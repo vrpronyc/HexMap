@@ -1073,6 +1073,8 @@ MonoBehaviour:
     m_HexEdge4NeighborsProbability: 0.08333334
     m_HexEdge5NeighborsProbability: 0.08333334
     m_HexEdge6NeighborsProbability: 0.1
+  m_HexWaystationProbability: 0.01
+  m_HexHazardProbability: 0.01
   m_HexMapResourcePath: HexMap_
   m_SourceTexture: {fileID: 0}
   m_DefaultColor: {r: 0.8584906, g: 0.606466, b: 0.028346404, a: 1}
@@ -1090,6 +1092,10 @@ MonoBehaviour:
   m_NullHexPicked: {fileID: 998077675}
   m_HexPicked: {fileID: 1284063111}
   m_HexNeighborDwellTime: 1
+  m_Home: {fileID: 0}
+  m_HomeIndex:
+    ix: 0
+    iy: 0
   m_DBG: 0
 --- !u!4 &740631224
 Transform:
@@ -2542,6 +2548,8 @@ MonoBehaviour:
     m_HexEdge4NeighborsProbability: 0.08333334
     m_HexEdge5NeighborsProbability: 0.08333334
     m_HexEdge6NeighborsProbability: 0.1
+  m_HexWaystationProbability: 0.1
+  m_HexHazardProbability: 0.1
   m_HexMapResourcePath: HexMap_
   m_SourceTexture: {fileID: 0}
   m_DefaultColor: {r: 0.8584906, g: 0.606466, b: 0.028346404, a: 1}
@@ -2559,6 +2567,10 @@ MonoBehaviour:
   m_NullHexPicked: {fileID: 998077675}
   m_HexPicked: {fileID: 1284063111}
   m_HexNeighborDwellTime: 1
+  m_Home: {fileID: 0}
+  m_HomeIndex:
+    ix: 0
+    iy: 0
   m_DBG: 0
 --- !u!4 &1728522346
 Transform:

@@ -39,6 +39,8 @@ public class HexMapBuilder : MonoBehaviour
     }
 
     public List<HexBuildPass> m_HexBuildPasses;
+    public float m_HexWaystationProbability = 0.01f;
+    public float m_HexHazardProbability = 0.01f;
 
     public string m_HexMapResourcePath = "HexMap_";
     public Texture2D m_SourceTexture;
@@ -122,7 +124,7 @@ public class HexMapBuilder : MonoBehaviour
 
     public Hex m_Home;
     public Hex.HexIndex m_HomeIndex;
-    public Color m_HomeColor = Color.gray;
+    //public Color m_HomeColor = Color.gray;
 
     public bool m_DBG = false;
 
@@ -652,7 +654,7 @@ public class HexMapBuilder : MonoBehaviour
                 SetDecal(m_Hexes[iy][ix]);
             }
         }
-        m_Hexes[m_HomeIndex.iy][m_HomeIndex.ix].m_Color = m_HomeColor;
+        m_Hexes[m_HomeIndex.iy][m_HomeIndex.ix].SetHexSubType(Hex.HexSubType.Home);
         NavigationController.Instance.StartPath(m_Home);
 
         ConfigureQuad();
@@ -764,6 +766,18 @@ public class HexMapBuilder : MonoBehaviour
             hex.m_Color = m_DefaultColor;
             hex.m_Renderer.SetPropertyBlock(block);
             hex.m_Block = block;
+            if (index < 0x3f)
+            {
+                if (Random.Range(0f, 1f) < m_HexWaystationProbability)
+                {
+                    hex.SetHexSubType(Hex.HexSubType.Waystation);
+                }
+                else if (Random.Range(0f, 1f) < m_HexHazardProbability)
+                {
+                    hex.SetHexSubType(Hex.HexSubType.Hazard);
+                }
+
+            }
         }
     }
     void ConfigureQuad()

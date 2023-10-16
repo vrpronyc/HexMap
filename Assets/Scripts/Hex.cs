@@ -27,6 +27,12 @@ public class Hex : MonoBehaviour
 {
     public enum HexVisibility { Undefined, Unknown, Known, Discovered };
 
+    public enum HexSubType { Undefined, Home, Waystation, Hazard };
+    Color m_HexSubTypeColorHome = Color.gray;
+    Color m_HexSubTypeColorWaystation = Color.green;
+    Color m_HexSubTypeColorHazard = Color.red;
+    HexSubType m_HexSubType = HexSubType.Undefined;
+
     [System.Serializable]
     public class HexIndex
     {
@@ -194,6 +200,30 @@ public class Hex : MonoBehaviour
             m_Renderer.SetPropertyBlock(m_Block);
             m_BlockColor = m_Color;
             m_BlockTextureST = m_TextureST;
+        }
+    }
+
+    public void SetHexSubType(HexSubType hst)
+    {
+        if (hst != m_HexSubType)
+        {
+            m_HexSubType = hst;
+            switch (hst)
+            {
+                case HexSubType.Undefined:
+                    break;
+                case HexSubType.Home:
+                    m_Color = m_HexSubTypeColorHome;
+                    break;
+                case HexSubType.Waystation:
+                    m_Color = m_HexSubTypeColorWaystation;
+                    break;
+                case HexSubType.Hazard:
+                    m_Color = m_HexSubTypeColorHazard;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
