@@ -655,7 +655,7 @@ public class HexMapBuilder : MonoBehaviour
             }
         }
         m_Hexes[m_HomeIndex.iy][m_HomeIndex.ix].SetHexSubType(Hex.HexSubType.Home);
-        NavigationController.Instance.StartPath(m_Home);
+        //NavigationController.Instance.StartPath(m_Home);
 
         ConfigureQuad();
     }

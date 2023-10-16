@@ -130,8 +130,8 @@ MonoBehaviour:
   m_fontSize: 5
   m_fontSizeBase: 5
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 1
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
@@ -225,7 +225,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 866b701c5533fac46bf4a6e0ee6267eb, type: 3}
       propertyPath: m_Name
-      value: PickedHex Variant
+      value: PickedHex
       objectReference: {fileID: 0}
     - target: {fileID: 5334272077966645907, guid: 866b701c5533fac46bf4a6e0ee6267eb, type: 3}
       propertyPath: m_Materials.Array.data[0]
