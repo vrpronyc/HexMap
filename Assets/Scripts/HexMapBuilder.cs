@@ -766,18 +766,23 @@ public class HexMapBuilder : MonoBehaviour
             hex.m_Color = m_DefaultColor;
             hex.m_Renderer.SetPropertyBlock(block);
             hex.m_Block = block;
-            if (index < 0x3f)
-            {
-                if (Random.Range(0f, 1f) < m_HexWaystationProbability)
-                {
-                    hex.SetHexSubType(Hex.HexSubType.Waystation);
-                }
-                else if (Random.Range(0f, 1f) < m_HexHazardProbability)
-                {
-                    hex.SetHexSubType(Hex.HexSubType.Hazard);
-                }
 
+            if (hex.m_HexVisibility != Hex.HexVisibility.Known)
+            {
+                if (index < 0x3f)
+                {
+                    if (Random.Range(0f, 1f) < m_HexWaystationProbability)
+                    {
+                        hex.SetHexSubType(Hex.HexSubType.Waystation);
+                    }
+                    else if (Random.Range(0f, 1f) < m_HexHazardProbability)
+                    {
+                        hex.SetHexSubType(Hex.HexSubType.Hazard);
+                    }
+
+                }
             }
+
         }
     }
     void ConfigureQuad()
