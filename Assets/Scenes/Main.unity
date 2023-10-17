@@ -408,7 +408,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 71983364}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2122600028}
+        m_TargetAssemblyTypeName: NavigationController, Assembly-CSharp
+        m_MethodName: DeleteCurrentShipLatest
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &71983364
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1414,7 +1426,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 531344563}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2122600028}
+        m_TargetAssemblyTypeName: NavigationController, Assembly-CSharp
+        m_MethodName: ClearCurrentShipPath
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &531344563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2008,7 +2032,9 @@ MonoBehaviour:
   m_HexMapResourcePath: HexMap_
   m_SourceTexture: {fileID: 0}
   m_DefaultColor: {r: 0.8584906, g: 0.606466, b: 0.028346404, a: 1}
+  m_DefaultDiscoveredColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
   m_SeaColor: {r: 0, g: 0, b: 1, a: 1}
+  m_SeaDiscoveredColor: {r: 0.25, g: 0.25, b: 0.75, a: 1}
   m_SeaMtl: {fileID: 2100000, guid: 721e192cc9d92d64487cb87b830831ff, type: 2}
   m_LandMtl: {fileID: 2100000, guid: dbf413dad2da1a94e8b8d3eb7e724af1, type: 2}
   m_HexMtl: {fileID: 2100000, guid: 7de33b07486732c4ebc34632fd5d846d, type: 2}
@@ -2454,7 +2480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3828,7 +3854,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1382173513}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2122600028}
+        m_TargetAssemblyTypeName: NavigationController, Assembly-CSharp
+        m_MethodName: Sail
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1382173513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4974,7 +5012,9 @@ MonoBehaviour:
   m_HexMapResourcePath: HexMap_
   m_SourceTexture: {fileID: 0}
   m_DefaultColor: {r: 0.8584906, g: 0.606466, b: 0.028346404, a: 1}
+  m_DefaultDiscoveredColor: {r: 0.5943396, g: 0.4800842, b: 0.21586862, a: 1}
   m_SeaColor: {r: 0, g: 0, b: 1, a: 1}
+  m_SeaDiscoveredColor: {r: 0.25, g: 0.25, b: 0.75, a: 1}
   m_SeaMtl: {fileID: 2100000, guid: 721e192cc9d92d64487cb87b830831ff, type: 2}
   m_LandMtl: {fileID: 2100000, guid: dbf413dad2da1a94e8b8d3eb7e724af1, type: 2}
   m_HexMtl: {fileID: 2100000, guid: 7de33b07486732c4ebc34632fd5d846d, type: 2}

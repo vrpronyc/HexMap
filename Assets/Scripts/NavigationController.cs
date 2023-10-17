@@ -141,6 +141,30 @@ public class NavigationController : MonoBehaviour
         }
         path.RemoveRange(0, iNumberOfSteps); 
     }
+
+    public void ClearCurrentShipPath()
+    {
+        if (GameController.Instance.m_CurrentShip != null)
+        {
+            List<PathEntry> path = GameController.Instance.m_CurrentShip.GetPath();
+            Hex hex = path[0].hex;
+            ClearPath(GameController.Instance.m_CurrentShip);
+            AddHexToPath(hex, GameController.Instance.m_CurrentShip);
+        }
+    }
+
+    public void DeleteCurrentShipLatest()
+    {
+        if (GameController.Instance.m_CurrentShip != null)
+        {
+            List<PathEntry> path = GameController.Instance.m_CurrentShip.GetPath();
+            if (path.Count > 1)
+            {
+                Destroy(path[path.Count - 1].marker);
+                path.RemoveAt(path.Count - 1);
+            }
+        }
+    }
     public void ClearPath(ShipManager shipManager)
     {
         if (shipManager == null)
@@ -179,7 +203,10 @@ public class NavigationController : MonoBehaviour
                     yield break;
                 }
                 hex = path[0].hex;
-                hex.SetHexVisibility(Hex.HexVisibility.Discovered);
+                if (hex.m_HexVisibility == Hex.HexVisibility.Unknown)
+                {
+                    hex.SetHexVisibility(Hex.HexVisibility.Discovered);
+                }
                 if (path.Count == 1)
                 {
                     ClearPath(GameController.Instance.m_ShipManagers[iShipIndex]);

@@ -111,13 +111,20 @@ public class Hex : MonoBehaviour
 
     public Vector4 m_TextureST;
     public Color m_Color = Color.white;
+    public Color m_BackgroundColor = Color.white;
     public Vector4 m_BlockTextureST;
     public Color m_BlockColor = Color.white;
+    public Color m_BlockBackgroundColor = Color.white;
 
     int m_UnknownLayer = 0;
     int m_KnownLayer = 0;
     int m_DiscoveredLayer = 0;
 
+    public void SetHexColor(Color foreground, Color background)
+    {
+        m_Color = foreground; 
+        m_BackgroundColor = background;
+    }
 
     public Material m_HexMaterial;
     public Material HexMaterial
@@ -191,14 +198,17 @@ public class Hex : MonoBehaviour
     void Update()
     {
         if ((m_BlockColor != m_Color)
+            || (m_BlockBackgroundColor != m_BackgroundColor)
             || (m_BlockTextureST != m_TextureST)
             )
         { 
             m_Block = new MaterialPropertyBlock();
             m_Block.SetVector("_MainTex_ST", m_TextureST);
             m_Block.SetColor("_Color", m_Color);
+            m_Block.SetColor("_BackgroundColor", m_BackgroundColor);
             m_Renderer.SetPropertyBlock(m_Block);
             m_BlockColor = m_Color;
+            m_BlockBackgroundColor = m_BackgroundColor;
             m_BlockTextureST = m_TextureST;
         }
     }

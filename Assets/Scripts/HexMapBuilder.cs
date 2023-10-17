@@ -45,7 +45,9 @@ public class HexMapBuilder : MonoBehaviour
     public string m_HexMapResourcePath = "HexMap_";
     public Texture2D m_SourceTexture;
     public Color m_DefaultColor = Color.white;
+    public Color m_DefaultDiscoveredColor = Color.Lerp(Color.grey, Color.white, 0.5f);
     public Color m_SeaColor = Color.blue;
+    public Color m_SeaDiscoveredColor = Color.Lerp(Color.grey, Color.blue, 0.5f);
     public Material m_SeaMtl;
     public Material m_LandMtl;
     public Material m_HexMtl;
@@ -213,13 +215,30 @@ public class HexMapBuilder : MonoBehaviour
         int visCount = 0;
         // start with land
         Hex hex = m_Hexes[m_Height - 1][ix];
-        for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
-        {
-            Hex.HexIndex hi = hex.m_HexPointIndeces[e];
-            m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Land;
-        }
-        hex.SetHexVisibility(Hex.HexVisibility.Known);
+        //for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
+        //{
+        //    Hex.HexIndex hi = hex.m_HexPointIndeces[e];
+        //    m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Land;
+        //}
+        //hex.SetHexVisibility(Hex.HexVisibility.Known);
         // set neighbors to land
+        for (int i = 0; i < hex.m_Neighbor.Length; i++)
+        {
+            if (hex.m_Neighbor[i] != null)
+            {
+                Hex neighbor = hex.m_Neighbor[i];
+                for (int j = 0; j < neighbor.m_Neighbor.Length; j++)
+                {
+                    Hex neighborsNeighbor = neighbor.m_Neighbor[j];
+                    if (neighborsNeighbor != null)
+                    {
+                        Hex.HexIndex hi = neighborsNeighbor.m_HexPointIndeces[CENTER_INDEX];
+                        m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Sea;
+                        neighborsNeighbor.SetHexVisibility(Hex.HexVisibility.Known);
+                    }
+                }
+            }
+        }
         for (int i = 0; i < hex.m_Neighbor.Length; i++)
         {
             if(hex.m_Neighbor[i] != null)
@@ -236,21 +255,12 @@ public class HexMapBuilder : MonoBehaviour
                 }
             }
         }
-        for (int i = 0; i < hex.m_Neighbor.Length; i++)
+        for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
         {
-            if (hex.m_Neighbor[i] != null)
-            {
-                Hex neighbor = hex.m_Neighbor[i];
-                for (int j = 0; j < neighbor.m_Neighbor.Length; j++)
-                {
-                    Hex neighborsNeighbor = neighbor.m_Neighbor[j];
-                    if (neighborsNeighbor != null)
-                    {
-                        neighborsNeighbor.SetHexVisibility(Hex.HexVisibility.Known);
-                    }
-                }
-            }
+            Hex.HexIndex hi = hex.m_HexPointIndeces[e];
+            m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Land;
         }
+        hex.SetHexVisibility(Hex.HexVisibility.Known);
 
         m_HomeIndex = homeIndex;
     }
@@ -748,8 +758,16 @@ public class HexMapBuilder : MonoBehaviour
             MaterialPropertyBlock block = new MaterialPropertyBlock();
             hex.m_TextureST = new Vector4(0.0625f, 0.125f, ox, oy);
             block.SetVector("_MainTex_ST", hex.m_TextureST);
-            block.SetColor("_Color", m_SeaColor);
-            hex.m_Color = m_SeaColor;
+            if (hex.m_HexVisibility == Hex.HexVisibility.Known)
+            {
+                hex.SetHexColor(m_SeaColor, m_SeaDiscoveredColor);
+                //block.SetColor("_Color", m_SeaColor);
+            }
+            else
+            {
+                hex.SetHexColor(m_SeaDiscoveredColor, m_SeaDiscoveredColor);
+                //block.SetColor("_Color", m_SeaDiscoveredColor);
+            }
             hex.m_Renderer.SetPropertyBlock(block);
             hex.m_Block = block;
         }
@@ -762,8 +780,16 @@ public class HexMapBuilder : MonoBehaviour
             MaterialPropertyBlock block = new MaterialPropertyBlock();
             hex.m_TextureST = new Vector4(0.0625f, 0.125f, ox, oy);
             block.SetVector("_MainTex_ST", hex.m_TextureST);
-            block.SetColor("_Color", m_DefaultColor);
-            hex.m_Color = m_DefaultColor;
+            if (hex.m_HexVisibility == Hex.HexVisibility.Known)
+            {
+                hex.SetHexColor(m_DefaultColor, m_SeaColor);
+                //block.SetColor("_Color", m_DefaultColor);
+            }
+            else
+            {
+                hex.SetHexColor(m_DefaultDiscoveredColor, m_SeaDiscoveredColor);
+                //block.SetColor("_Color", m_DefaultDiscoveredColor);
+            }
             hex.m_Renderer.SetPropertyBlock(block);
             hex.m_Block = block;
 
@@ -779,10 +805,8 @@ public class HexMapBuilder : MonoBehaviour
                     {
                         hex.SetHexSubType(Hex.HexSubType.Hazard);
                     }
-
                 }
             }
-
         }
     }
     void ConfigureQuad()
