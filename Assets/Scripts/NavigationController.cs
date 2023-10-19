@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class NavigationController : MonoBehaviour
 {
+    public enum HexMovementEffect { Undef, None, Discovery, Sink, Dock };
     static NavigationController m_instance;
     public static NavigationController Instance
     {
@@ -119,12 +120,12 @@ public class NavigationController : MonoBehaviour
             }
             go.transform.position = hex.GetHexPosition();
             go.transform.SetParent(parent, false);
-            go.name = "path_" + (path.Count + 1).ToString();
+            go.name = "path_" + path.Count.ToString();
             PathEntry entry = new PathEntry();
             entry.hex = hex;
             entry.marker = go;
-            path.Add(entry);
             hpc.SetLabel(path.Count.ToString());
+            path.Add(entry);
         }
     }
     public void ClearPathSteps(ShipManager shipManager, int iNumberOfSteps)
@@ -183,13 +184,46 @@ public class NavigationController : MonoBehaviour
     {
         StartCoroutine(SailCoroutine());
     }
+
+    HexMovementEffect MoveToHex(Hex hex)
+    {
+        Hex.HexVisibility visibility = hex.m_HexVisibility;
+        if (hex.m_HexVisibility == Hex.HexVisibility.Unknown)
+        {
+            hex.SetHexVisibility(Hex.HexVisibility.Discovered);
+        }
+        switch (hex.GetHexSubType())
+        {
+            case Hex.HexSubType.Undefined:
+                break;
+            case Hex.HexSubType.Home:
+                return HexMovementEffect.Dock;
+                break;
+            case Hex.HexSubType.Waystation:
+                return HexMovementEffect.Dock;
+                break;
+            case Hex.HexSubType.Hazard:
+                return HexMovementEffect.Sink;
+                break;
+            default:
+                break;
+        }
+        if ((visibility == Hex.HexVisibility.Unknown) 
+            && hex.HexHasLand())
+        {
+            return HexMovementEffect.Discovery;
+        }
+        return HexMovementEffect.None;
+
+    }
     IEnumerator SailCoroutine()
     {
+        HexMovementEffect effect = HexMovementEffect.None;
         bool keepSailing = true;
         int iDayCount = 0;
+        Hex hex = null;
         while (keepSailing)
         {
-            Hex hex = null;
             if (iDayCount > 0)
             {
                 GameController.Instance.IncrementDay();
@@ -203,11 +237,13 @@ public class NavigationController : MonoBehaviour
                     yield break;
                 }
                 hex = path[0].hex;
-                if (hex.m_HexVisibility == Hex.HexVisibility.Unknown)
+                effect = MoveToHex(hex);
+                if ((iDayCount > 0) && (effect != HexMovementEffect.None))
                 {
-                    hex.SetHexVisibility(Hex.HexVisibility.Discovered);
+                    keepSailing = false;
                 }
-                if (path.Count == 1)
+
+                if ((path.Count == 1) || !keepSailing)
                 {
                     ClearPath(GameController.Instance.m_ShipManagers[iShipIndex]);
                     if (hex != null)
@@ -220,12 +256,22 @@ public class NavigationController : MonoBehaviour
                 {
                     ClearPathSteps(GameController.Instance.m_ShipManagers[iShipIndex], 1);
                 }
+
+                if (!keepSailing)
+                {
+                    break; 
+                }
             }
             if (iDayCount > 0)
             {
                 yield return new WaitForSeconds(m_SailDwellTime);
             }
             iDayCount++;
+        }
+        Debug.Log("Done Sailing today");
+        if (effect != HexMovementEffect.None)
+        {
+            GameController.Instance.HandleMovementEffect(hex, effect);
         }
     }
     public void AddToCurrentShipPath()

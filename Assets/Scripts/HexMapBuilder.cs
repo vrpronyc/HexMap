@@ -8,9 +8,9 @@ public class HexMapBuilder : MonoBehaviour
     static HexMapBuilder m_instance;
     public static HexMapBuilder Instance
     {
-        get 
-        { 
-            return m_instance; 
+        get
+        {
+            return m_instance;
         }
     }
 
@@ -54,6 +54,13 @@ public class HexMapBuilder : MonoBehaviour
 
     Hex[][] m_Hexes;
     HexPoint[][] m_HexPoints;
+    public HexPoint[][] HexPoints
+    {
+        get
+        {
+            return m_HexPoints;
+        }
+    }
 
     Vector3 m_HexMapMin;
     Vector3 m_HexMapMax;
@@ -97,7 +104,7 @@ public class HexMapBuilder : MonoBehaviour
     ///              Rise, Drop = m_Scale * 0.25f ;
     ///              Run = m_Scale * 0.5f ;
     /// </summary>
-    const int CENTER_INDEX = 2;
+    public const int CENTER_INDEX = 2;
 
     public int m_Width = 12;
     public int m_Height = 10;
@@ -126,7 +133,6 @@ public class HexMapBuilder : MonoBehaviour
 
     public Hex m_Home;
     public Hex.HexIndex m_HomeIndex;
-    //public Color m_HomeColor = Color.gray;
 
     public bool m_DBG = false;
 
@@ -213,15 +219,7 @@ public class HexMapBuilder : MonoBehaviour
         Hex.HexIndex homeIndex = new Hex.HexIndex(ix, m_Height - 1);
 
         int visCount = 0;
-        // start with land
         Hex hex = m_Hexes[m_Height - 1][ix];
-        //for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
-        //{
-        //    Hex.HexIndex hi = hex.m_HexPointIndeces[e];
-        //    m_HexPoints[hi.iy][hi.ix].hexPointType = HexPoint.HexPointType.Land;
-        //}
-        //hex.SetHexVisibility(Hex.HexVisibility.Known);
-        // set neighbors to land
         for (int i = 0; i < hex.m_Neighbor.Length; i++)
         {
             if (hex.m_Neighbor[i] != null)
@@ -241,7 +239,7 @@ public class HexMapBuilder : MonoBehaviour
         }
         for (int i = 0; i < hex.m_Neighbor.Length; i++)
         {
-            if(hex.m_Neighbor[i] != null)
+            if (hex.m_Neighbor[i] != null)
             {
                 Hex neighbor = hex.m_Neighbor[i];
                 Hex.HexIndex hi = neighbor.m_HexPointIndeces[CENTER_INDEX];
@@ -264,6 +262,48 @@ public class HexMapBuilder : MonoBehaviour
 
         m_HomeIndex = homeIndex;
     }
+    
+    void AssignRandomSubType(Hex hex)
+    {
+        if (hex.m_HexVisibility != Hex.HexVisibility.Known)
+        {
+            int index = hex.GetHexVertexIndex();
+
+            if (index < 0x3f)
+            {
+                if (Random.Range(0f, 1f) < m_HexWaystationProbability)
+                {
+                    hex.SetHexSubType(Hex.HexSubType.Waystation);
+                }
+                else if (Random.Range(0f, 1f) < m_HexHazardProbability)
+                {
+                    hex.SetHexSubType(Hex.HexSubType.Hazard);
+                }
+            }
+        }
+    }
+
+    void ClearUnknownHexPoints()
+    {
+        for (int iy = 0; iy < m_HeightCount; iy++)
+        {
+            for (int ix = 0; ix < m_WidthCount; ix++)
+            {
+                if (m_HexPoints[iy][ix].pointVisibility == Hex.HexVisibility.Unknown)
+                {
+                    m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
+                }
+            }
+        }
+        for (int iy = 0; iy < m_Height; iy++)
+        {
+            for (int ix = 0; ix < m_Width; ix++)
+            {
+                SetDecal(m_Hexes[iy][ix]);
+            }
+        }
+
+    }
     void GenerateIslands()
     {
         HexPoint.HexPointType[][] tempSea = new HexPoint.HexPointType[m_HeightCount][];
@@ -285,6 +325,11 @@ public class HexMapBuilder : MonoBehaviour
             {
                 for (int ix = 0; ix < m_Width; ix++)
                 {
+                    if (m_Hexes[iy][ix].m_HexVisibility == Hex.HexVisibility.Known)
+                    {
+                        continue;
+                    }
+
                     Hex.HexIndex hi = m_Hexes[iy][ix].m_HexPointIndeces[CENTER_INDEX];
                     if ((hi.ix < 2) ||
                         (hi.ix > (m_WidthCount - 3)) ||
@@ -315,6 +360,11 @@ public class HexMapBuilder : MonoBehaviour
                             {
                                 Hex.HexIndex hiE = m_Hexes[iy][ix].m_HexPointIndeces[e];
                                 // Now count neighbors
+                                if (m_HexPoints[hiE.iy][hiE.ix].pointVisibility == Hex.HexVisibility.Known)
+                                {
+                                    continue;
+                                }
+
                                 int count = 0;
                                 if (tempSea[hi.iy][hi.ix] == HexPoint.HexPointType.Land)
                                 {
@@ -383,19 +433,23 @@ public class HexMapBuilder : MonoBehaviour
                 }
             }
         }
-        //if ((ix < 2) ||
-        //    (ix > (m_WidthCount - 3)) ||
-        //    (iy == 0) ||
-        //    (iy == (m_HeightCount - 1))
-        //    )
-        //{
-        //    m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
-        //}
-        //else
-        //{
-        //    m_HexPoints[iy][ix].hexPointType = (Random.Range(0.0f, 1.0f) > 0.75f ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
-        //}
+    }
 
+    void GenerateSubTypes()
+    { 
+        for (int iy = 0; iy < m_Height; iy++)
+        {
+            for (int ix = 0; ix < m_Width; ix++)
+            {
+                if (m_Hexes[iy][ix].m_HexVisibility != Hex.HexVisibility.Known)
+                {
+                    if (m_Hexes[iy][ix].GetHexCenterPointType() == HexPoint.HexPointType.Land)
+                    {
+                        AssignRandomSubType(m_Hexes[iy][ix]);
+                    }
+                }
+            }
+        }
     }
 
     public void BuildMap()
@@ -445,18 +499,6 @@ public class HexMapBuilder : MonoBehaviour
 
                 if (m_SourceTexture == null)
                 {
-                    //if ((ix < 2) ||
-                    //    (ix > (m_WidthCount - 3)) ||
-                    //    (iy == 0) ||
-                    //    (iy == (m_HeightCount - 1))
-                    //    )
-                    //{
-                    //    m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
-                    //}
-                    //else
-                    //{
-                    //    m_HexPoints[iy][ix].hexPointType = (Random.Range(0.0f, 1.0f) > 0.75f ? HexPoint.HexPointType.Land : HexPoint.HexPointType.Sea);
-                    //}
                     m_HexPoints[iy][ix].hexPointType = HexPoint.HexPointType.Sea;
                 }
             }
@@ -648,12 +690,13 @@ public class HexMapBuilder : MonoBehaviour
             }
         }
 
+        SetHexNeighbors();
+
         if (m_SourceTexture == null)
         {
-            GenerateIslands(); 
+            GenerateIslands();
         }
-
-        SetHexNeighbors();
+        GenerateSubTypes();
 
         GenerateHome(m_Width / 2);
 
@@ -661,6 +704,10 @@ public class HexMapBuilder : MonoBehaviour
         {
             for (int ix = 0; ix < m_Width; ix++)
             {
+                if ((ix == 50) && (iy == 49))
+                {
+                    Debug.Log("Check it");
+                }
                 SetDecal(m_Hexes[iy][ix]);
             }
         }
@@ -739,16 +786,17 @@ public class HexMapBuilder : MonoBehaviour
     }
     void SetDecal(Hex hex)
     {
-        int index = 0;
-        for (int i = 0; i < hex.m_HexPointIndeces.Length; i++)
-        {
-            int ix = hex.m_HexPointIndeces[i].ix;
-            int iy = hex.m_HexPointIndeces[i].iy;
-            if (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
-            {
-                index = index | (0x01 << i);
-            }
-        }
+        //int index = 0;
+        //for (int i = 0; i < hex.m_HexPointIndeces.Length; i++)
+        //{
+        //    int ix = hex.m_HexPointIndeces[i].ix;
+        //    int iy = hex.m_HexPointIndeces[i].iy;
+        //    if (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
+        //    {
+        //        index = index | (0x01 << i);
+        //    }
+        //}
+        int index = hex.GetHexVertexIndex();
 
         if (index == 0)
         {
@@ -793,20 +841,20 @@ public class HexMapBuilder : MonoBehaviour
             hex.m_Renderer.SetPropertyBlock(block);
             hex.m_Block = block;
 
-            if (hex.m_HexVisibility != Hex.HexVisibility.Known)
-            {
-                if (index < 0x3f)
-                {
-                    if (Random.Range(0f, 1f) < m_HexWaystationProbability)
-                    {
-                        hex.SetHexSubType(Hex.HexSubType.Waystation);
-                    }
-                    else if (Random.Range(0f, 1f) < m_HexHazardProbability)
-                    {
-                        hex.SetHexSubType(Hex.HexSubType.Hazard);
-                    }
-                }
-            }
+            //if (hex.m_HexVisibility != Hex.HexVisibility.Known)
+            //{
+            //    if (index < 0x3f)
+            //    {
+            //        if (Random.Range(0f, 1f) < m_HexWaystationProbability)
+            //        {
+            //            hex.SetHexSubType(Hex.HexSubType.Waystation);
+            //        }
+            //        else if (Random.Range(0f, 1f) < m_HexHazardProbability)
+            //        {
+            //            hex.SetHexSubType(Hex.HexSubType.Hazard);
+            //        }
+            //    }
+            //}
         }
     }
     void ConfigureQuad()
@@ -985,6 +1033,39 @@ public class HexMapBuilder : MonoBehaviour
         yield return 0;
     }
 
+    public void MoveDiscoveredHexesToKnownHexes()
+    {
+        for (int iy = 0; iy < m_Height; iy++)
+        {
+            for (int ix = 0; ix < m_Width; ix++)
+            {
+                if (m_Hexes[iy][ix].m_HexVisibility == Hex.HexVisibility.Discovered)
+                {
+                    Hex.HexSubType subType = m_Hexes[iy][ix].GetHexSubType();
+                    m_Hexes[iy][ix].SetHexVisibility(Hex.HexVisibility.Known);
+                    for (int e = 0; e < m_Hexes[iy][ix].m_HexPointIndeces.Length; e++)
+                    {
+                        Hex.HexIndex hi = m_Hexes[iy][ix].m_HexPointIndeces[e];
+                        if (hi != null)
+                        {
+                            m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
+                        }
+                    }
+                    SetDecal(m_Hexes[iy][ix]);
+                }
+            }
+        }
+    }
+
+    public void RegenerateUnknownHexes()
+    {
+        //ClearUnknownHexPoints();
+        //if (m_SourceTexture == null)
+        //{
+        //    GenerateIslands();
+        //}
+        //GenerateSubTypes();
+    }
     void Start()
     {
         BuildMap();

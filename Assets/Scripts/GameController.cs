@@ -166,6 +166,38 @@ public class GameController : MonoBehaviour
     {
 
     }
+
+    public void HandleMovementEffect(Hex hex, NavigationController.HexMovementEffect effect)
+    {
+        if (hex == null)
+        {
+            Debug.LogError("Null hex");
+            return;
+        }
+
+        switch (effect)
+        {
+            case NavigationController.HexMovementEffect.Undef:
+                break;
+            case NavigationController.HexMovementEffect.None:
+                break;
+            case NavigationController.HexMovementEffect.Discovery:
+                break;
+            case NavigationController.HexMovementEffect.Sink:
+                break;
+            case NavigationController.HexMovementEffect.Dock:
+                {
+                    if (hex == HexMapBuilder.Instance.m_Home)
+                    {
+                        HexMapBuilder.Instance.MoveDiscoveredHexesToKnownHexes();
+                        HexMapBuilder.Instance.RegenerateUnknownHexes();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
     void Start()
     {
         UpdateDateTimeDisplay();

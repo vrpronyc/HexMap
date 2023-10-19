@@ -25,13 +25,14 @@ using UnityEngine;
 /// </summary>
 public class Hex : MonoBehaviour
 {
+    [System.Serializable]
     public enum HexVisibility { Undefined, Unknown, Known, Discovered };
 
     public enum HexSubType { Undefined, Home, Waystation, Hazard };
     Color m_HexSubTypeColorHome = Color.gray;
     Color m_HexSubTypeColorWaystation = Color.green;
     Color m_HexSubTypeColorHazard = Color.red;
-    HexSubType m_HexSubType = HexSubType.Undefined;
+    public HexSubType m_HexSubType = HexSubType.Undefined;
 
     [System.Serializable]
     public class HexIndex
@@ -120,9 +121,33 @@ public class Hex : MonoBehaviour
     int m_KnownLayer = 0;
     int m_DiscoveredLayer = 0;
 
+    int m_HexVertexIndex = -1;
+
+    public int GetHexVertexIndex()
+    {
+        //if (m_HexVertexIndex == -1)
+        {
+            m_HexVertexIndex = 0;
+            for (int i = 0; i < m_HexPointIndeces.Length; i++)
+            {
+                int ix = m_HexPointIndeces[i].ix;
+                int iy = m_HexPointIndeces[i].iy;
+                if (HexMapBuilder.Instance.HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
+                {
+                    m_HexVertexIndex = m_HexVertexIndex | (0x01 << i);
+                }
+            }
+        }
+
+        return m_HexVertexIndex;
+    }
+
     public void SetHexColor(Color foreground, Color background)
     {
-        m_Color = foreground; 
+        if (m_HexSubType == HexSubType.Undefined)
+        {
+            m_Color = foreground;
+        }
         m_BackgroundColor = background;
     }
 
@@ -168,8 +193,29 @@ public class Hex : MonoBehaviour
                 default:
                     break;
             }
+            for (int i = 0; i < m_HexPointIndeces.Length; i++)
+            {
+                HexIndex hi = m_HexPointIndeces[i];
+                HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].pointVisibility = vis;
+            }
             //Debug.Log($"layer in {vis.ToString()} obj layer {gameObject.layer.ToString()}");
         }
+    }
+
+    public bool HexHasLand()
+    {
+        for (int i = 0; i < m_HexPointIndeces.Length; i++)
+        {
+            HexIndex hi = m_HexPointIndeces[i];
+            if (hi != null)
+            {
+                if (HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexPointType == HexPoint.HexPointType.Land)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     public void SetHexIndeces(HexIndex[] hexIndecies)
     {
@@ -213,6 +259,16 @@ public class Hex : MonoBehaviour
         }
     }
 
+    public HexPoint.HexPointType GetHexCenterPointType()
+    {
+        HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
+        return (HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexPointType);
+    }
+
+    public HexSubType GetHexSubType()
+    {
+        return m_HexSubType;
+    }
     public void SetHexSubType(HexSubType hst)
     {
         if (hst != m_HexSubType)
