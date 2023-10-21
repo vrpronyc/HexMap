@@ -87,9 +87,9 @@ public class NavigationController : MonoBehaviour
         {
             return false;
         }
-        for (int i = 0; i < lastHex.m_Neighbor.Length; i++)
+        for (int i = 0; i < lastHex.m_SeaNeighbor.Length; i++)
         {
-            if (hex == lastHex.m_Neighbor[i])
+            if (hex == lastHex.m_SeaNeighbor[i])
             {
                 return true;
             }

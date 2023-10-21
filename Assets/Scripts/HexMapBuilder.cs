@@ -700,6 +700,8 @@ public class HexMapBuilder : MonoBehaviour
 
         GenerateHome(m_Width / 2);
 
+        SetHexSeaNeighbors();
+
         for (int iy = 0; iy < m_Height; iy++)
         {
             for (int ix = 0; ix < m_Width; ix++)
@@ -781,6 +783,98 @@ public class HexMapBuilder : MonoBehaviour
                 }
 
                 m_Hexes[iy][ix].SetNeighbors(neighbors);
+            }
+        }
+    }
+    void SetHexSeaNeighbors()
+    {
+        for (int iy = 0; iy < m_Height; iy++)
+        {
+            for (int ix = 0; ix < m_Width; ix++)
+            {
+                Hex[] neighbors = new Hex[6];
+                for (int i = 0; i < neighbors.Length; i++)
+                {
+                    neighbors[i] = null;
+                    if ((ix & 0x01) == 0x01)
+                    {
+                        neighbors[0] = m_Hexes[iy][ix - 1];
+                        if (iy > 0)
+                        {
+                            neighbors[1] = m_Hexes[iy - 1][ix];
+                        }
+                        if (ix < (m_Hexes[iy].Length - 1))
+                        {
+                            neighbors[2] = m_Hexes[iy][ix + 1];
+                        }
+                        if (iy < (m_Hexes.Length - 1))
+                        {
+                            if (ix < (m_Hexes[iy + 1].Length - 1))
+                            {
+                                neighbors[3] = m_Hexes[iy + 1][ix + 1];
+                            }
+                            neighbors[4] = m_Hexes[iy + 1][ix];
+                            neighbors[5] = m_Hexes[iy + 1][ix - 1];
+                        }
+                    }
+                    else
+                    {
+                        if (ix > 0)
+                        {
+                            if (iy > 0)
+                            {
+                                neighbors[0] = m_Hexes[iy - 1][ix - 1];
+                            }
+                        }
+                        if (iy > 0)
+                        {
+                            neighbors[1] = m_Hexes[iy - 1][ix];
+                            if (ix < (m_Hexes[iy - 1].Length - 1))
+                            {
+                                neighbors[2] = m_Hexes[iy - 1][ix + 1];
+                            }
+                        }
+                        if (ix < (m_Hexes[iy].Length - 1))
+                        {
+                            neighbors[3] = m_Hexes[iy][ix + 1];
+                        }
+                        if (iy < (m_Hexes.Length - 1))
+                        {
+                            neighbors[4] = m_Hexes[iy + 1][ix];
+                        }
+                        if (ix > 0)
+                        {
+                            neighbors[5] = m_Hexes[iy][ix - 1];
+                        }
+                    }
+                }
+
+                //m_Hexes[iy][ix].SetNeighbors(neighbors);
+
+                Hex[] seaNeighbors = new Hex[6];
+                for (int i = 0; i < neighbors.Length; i++)
+                {
+                    if (neighbors[i] == null)
+                    {
+                        seaNeighbors[i] = null;
+                    }
+                    else
+                    {
+                        Hex.HexIndexPair hexIP = m_Hexes[iy][ix].m_HexEdges[i];
+                        Hex.HexIndex hiA = m_Hexes[iy][ix].m_HexPointIndeces[hexIP.i0];
+                        Hex.HexIndex hiB = m_Hexes[iy][ix].m_HexPointIndeces[hexIP.i1];
+                        if ((m_HexPoints[hiA.iy][hiA.ix].hexPointType == HexPoint.HexPointType.Land)
+                         && (m_HexPoints[hiB.iy][hiB.ix].hexPointType == HexPoint.HexPointType.Land))
+                        {
+                            seaNeighbors[i] = null;
+                        }
+                        else
+                        {
+                            seaNeighbors[i] = neighbors[i];
+                        }
+                    }
+                }
+                m_Hexes[iy][ix].SetSeaNeighbors(seaNeighbors);
             }
         }
     }

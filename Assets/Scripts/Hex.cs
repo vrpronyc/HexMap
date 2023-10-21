@@ -103,6 +103,7 @@ public class Hex : MonoBehaviour
 
     public HexVisibility m_HexVisibility = HexVisibility.Undefined;
     public Hex[] m_Neighbor = new Hex[7] { null, null, null, null, null, null, null };
+    public Hex[] m_SeaNeighbor = new Hex[7] { null, null, null, null, null, null, null };
     public int[] m_TransitionCost = new int[] { 0, 0, 0, 0, 0, };
 
     public HexIndex m_ThisHexIndex;
@@ -233,6 +234,17 @@ public class Hex : MonoBehaviour
         for (int i = 0; i < neighbors.Length; i++)
         {
             m_Neighbor[i] = neighbors[i];
+        }
+    }
+    public void SetSeaNeighbors(Hex[] neighbors)
+    {
+        if ((neighbors == null) || (neighbors.Length != 6))
+        {
+            Debug.LogError("Bad neighbors list");
+        }
+        for (int i = 0; i < neighbors.Length; i++)
+        {
+            m_SeaNeighbor[i] = neighbors[i];
         }
     }
 
