@@ -192,6 +192,13 @@ public class GameController : MonoBehaviour
                         HexMapBuilder.Instance.MoveDiscoveredHexesToKnownHexes();
                         HexMapBuilder.Instance.RegenerateUnknownHexes();
                     }
+                    else if ((hex.GetHexCenterPointType() == HexPoint.HexPointType.Land)
+                        && (hex.m_HexVisibility == Hex.HexVisibility.Known)
+                        && (hex.GetHexSubType() == Hex.HexSubType.Waystation))
+                    {
+                        HexMapBuilder.Instance.MoveDiscoveredHexesToKnownHexes();
+                        HexMapBuilder.Instance.RegenerateUnknownHexes();
+                    }
                 }
                 break;
             default:
