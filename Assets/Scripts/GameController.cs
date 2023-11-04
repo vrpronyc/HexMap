@@ -11,6 +11,8 @@ public class GameController : MonoBehaviour
     DateTime m_Date = new DateTime(1501, 1, 1);
     public TMP_InputField m_ShipNameInputField;
 
+    public TextMeshProUGUI m_DoubloonsText;
+    public TextMeshProUGUI m_TradeGoodsText;
     public TextMeshProUGUI m_ShipStoresText;
 
     public Button m_PrevShipButton;
@@ -122,11 +124,11 @@ public class GameController : MonoBehaviour
     }
     void UpdateDateTimeDisplay()
     {
-        string dtString = m_Date.ToString("dddd, MMMM d, yyyy");
+        string dtString = m_Date.ToString("dddd\nMMMM d, yyyy");
         m_DateText.text = dtString;
     }
 
-    void UpdateShipStoresDisplay()
+    public void UpdateShipStoresDisplay()
     {
         if (m_CurrentShip == null)
         {
@@ -138,6 +140,28 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void UpdateTradeGoodsDisplay()
+    {
+        if (m_CurrentShip == null)
+        {
+            m_TradeGoodsText.text = "";
+        }
+        else
+        {
+            m_TradeGoodsText.text = m_ShipManagers[0].GetTradeGoods().ToString();
+        }
+    }
+    public void UpdateDoubloonsDisplay()
+    {
+        if (m_CurrentShip == null)
+        {
+            m_DoubloonsText.text = "";
+        }
+        else
+        {
+            m_DoubloonsText.text = m_ShipManagers[0].GetDoubloons().ToString();
+        }
+    }
     void SetShipNameDisplay(string name)
     {
         m_ShipNameInputField.text = name;
@@ -167,13 +191,15 @@ public class GameController : MonoBehaviour
 
     }
 
-    public void HandleMovementEffect(Hex hex, NavigationController.HexMovementEffect effect)
+    public bool HandleMovementEffect(ShipManager ship, Hex hex, NavigationController.HexMovementEffect effect)
     {
         if (hex == null)
         {
             Debug.LogError("Null hex");
-            return;
+            return true;
         }
+
+        bool keepSailing = true;
 
         switch (effect)
         {
@@ -182,28 +208,33 @@ public class GameController : MonoBehaviour
             case NavigationController.HexMovementEffect.None:
                 break;
             case NavigationController.HexMovementEffect.Discovery:
+                keepSailing = false;
                 break;
             case NavigationController.HexMovementEffect.Sink:
+                keepSailing = false;
                 break;
             case NavigationController.HexMovementEffect.Dock:
                 {
                     if (hex == HexMapBuilder.Instance.m_Home)
                     {
-                        HexMapBuilder.Instance.MoveDiscoveredHexesToKnownHexes();
+                        HexMapBuilder.Instance.MoveDiscoveredHexesFromListToKnownHexes(ship.GetDiscoveredHexes());
                         HexMapBuilder.Instance.RegenerateUnknownHexes();
                     }
                     else if ((hex.GetHexCenterPointType() == HexPoint.HexPointType.Land)
                         && (hex.m_HexVisibility == Hex.HexVisibility.Known)
                         && (hex.GetHexSubType() == Hex.HexSubType.Waystation))
                     {
-                        HexMapBuilder.Instance.MoveDiscoveredHexesToKnownHexes();
+                        HexMapBuilder.Instance.MoveDiscoveredHexesFromListToKnownHexes(ship.GetDiscoveredHexes());
                         HexMapBuilder.Instance.RegenerateUnknownHexes();
                     }
+                    keepSailing = false;
                 }
                 break;
             default:
                 break;
         }
+
+        return keepSailing;
     }
     void Start()
     {

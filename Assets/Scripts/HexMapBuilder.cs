@@ -1151,6 +1151,28 @@ public class HexMapBuilder : MonoBehaviour
         }
     }
 
+    public void MoveDiscoveredHexesFromListToKnownHexes(List<Hex> discoveredHexes)
+    {
+        for (int i = 0; i < discoveredHexes.Count; i++)
+        {
+            Hex hex = discoveredHexes[i];
+            if (hex.m_HexVisibility == Hex.HexVisibility.Discovered)
+            {
+                Hex.HexSubType subType = hex.GetHexSubType();
+                hex.SetHexVisibility(Hex.HexVisibility.Known);
+                for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
+                {
+                    Hex.HexIndex hi = hex.m_HexPointIndeces[e];
+                    if (hi != null)
+                    {
+                        m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
+                    }
+                }
+                SetDecal(hex);
+            }
+        }
+    }
+
     public void RegenerateUnknownHexes()
     {
         //ClearUnknownHexPoints();
