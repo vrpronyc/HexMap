@@ -124,6 +124,41 @@ public class Hex : MonoBehaviour
 
     int m_HexVertexIndex = -1;
 
+    string m_HexName = string.Empty;
+
+    Island m_Island = null;
+
+    public void SetIsland(Island island)
+    {
+        m_Island = island;
+    }
+
+    public string GetIslandName()
+    {
+        if (m_Island == null)
+        {
+            HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
+            m_Island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
+
+            return string.Empty;
+        }
+        return m_Island.m_IslandName;
+    }
+
+    public void SetHexName(string name)
+    {
+        m_HexName = name;
+        if (GetIslandName() == string.Empty)
+        {
+            if (m_Island == null)
+            {
+                HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
+                m_Island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
+            }
+            m_Island.m_IslandName = name;
+        }
+    }
+
     public int GetHexVertexIndex()
     {
         //if (m_HexVertexIndex == -1)

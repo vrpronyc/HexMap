@@ -8,7 +8,7 @@ public class NavigationController : MonoBehaviour
     public enum HexMovementEffect { Undef, None, Discovery, Sink, Dock };
     static NavigationController m_instance;
 
-    public enum NavigationControlType { Planning, Sailing };
+    public enum NavigationControlType { Planning, Sailing, WaitingOnModal };
     NavigationControlType m_NavigationControlType = NavigationControlType.Planning;
 
     public static NavigationController Instance
@@ -229,72 +229,79 @@ public class NavigationController : MonoBehaviour
     }
     IEnumerator SailCoroutine()
     {
-        HexMovementEffect effect = HexMovementEffect.None;
-        bool keepSailing = true; // If anything happens to any ship, we'll stop the coroutine
-        int iDayCount = 0;
-        Hex hex = null;
-        while (keepSailing)
+        if (m_NavigationControlType == NavigationControlType.Sailing)
         {
-            if (iDayCount > 0)
+            HexMovementEffect effect = HexMovementEffect.None;
+            bool keepSailing = true; // If anything happens to any ship, we'll stop the coroutine
+            int iDayCount = 0;
+            Hex hex = null;
+            while (keepSailing)
             {
-                GameController.Instance.IncrementDay();
-            }
-            for (int iShipIndex = 0; iShipIndex < GameController.Instance.m_ShipManagers.Count; iShipIndex++)
-            {
-                ShipManager ship = GameController.Instance.m_ShipManagers[iShipIndex];
-                List<PathEntry> path = ship.GetPath();
-                if (path == null)
+                if (iDayCount > 0)
                 {
-                    keepSailing = false;
-                    Debug.LogError("NO PATH");
-                    continue;
+                    GameController.Instance.IncrementDay();
                 }
-                if (path.Count == 0)
+                for (int iShipIndex = 0; iShipIndex < GameController.Instance.m_ShipManagers.Count; iShipIndex++)
                 {
-                    keepSailing = false;
-                    continue;
-                }    
-                hex = path[0].hex;
-                effect = MoveToHex(ship, hex);
-                //if ((iDayCount > 0) && (effect != HexMovementEffect.None)) // day 0 is just a repeat of the prior route's last day
-                if (iDayCount > 0) // day 0 is just a repeat of the prior route's last day
-                {
-                    //keepSailing = false;
-                    //GameController.Instance.HandleMovementEffect(ship, hex, effect);
-                    keepSailing = GameController.Instance.HandleMovementEffect(ship, hex, effect);
-                }
-
-                if ((path.Count == 1) || !keepSailing)
-                {
-                    ClearPath(ship);
-                    if (hex != null)
+                    ShipManager ship = GameController.Instance.m_ShipManagers[iShipIndex];
+                    List<PathEntry> path = ship.GetPath();
+                    if (path == null)
                     {
-                        AddHexToPath(hex, ship);
+                        keepSailing = false;
+                        Debug.LogError("NO PATH");
+                        continue;
                     }
-                    keepSailing = false;
-                }
-                else
-                {
-                    ClearPathSteps(ship, 1);
-                }
+                    if (path.Count == 0)
+                    {
+                        keepSailing = false;
+                        continue;
+                    }
+                    hex = path[0].hex;
+                    effect = MoveToHex(ship, hex);
+                    //if ((iDayCount > 0) && (effect != HexMovementEffect.None)) // day 0 is just a repeat of the prior route's last day
+                    if (iDayCount > 0) // day 0 is just a repeat of the prior route's last day
+                    {
+                        //keepSailing = false;
+                        //GameController.Instance.HandleMovementEffect(ship, hex, effect);
+                        keepSailing = GameController.Instance.HandleMovementEffect(ship, hex, effect);
+                    }
 
+                    if ((path.Count == 1) || !keepSailing)
+                    {
+                        ClearPath(ship);
+                        if (hex != null)
+                        {
+                            AddHexToPath(hex, ship);
+                        }
+                        keepSailing = false;
+                    }
+                    else
+                    {
+                        ClearPathSteps(ship, 1);
+                    }
+
+                }
+                if (!keepSailing)
+                {
+                    break;
+                }
+                if (iDayCount > 0)
+                {
+                    yield return new WaitForSeconds(m_SailDwellTime);
+                }
+                iDayCount++;
             }
-            if (!keepSailing)
-            {
-                break; 
-            }
-            if (iDayCount > 0)
-            {
-                yield return new WaitForSeconds(m_SailDwellTime);
-            }
-            iDayCount++;
+            Debug.Log("Done Sailing today");
+            //if (effect != HexMovementEffect.None)
+            //{
+            //    GameController.Instance.HandleMovementEffect(hex, effect);
+            //}
+            m_NavigationControlType = NavigationControlType.Planning;
         }
-        Debug.Log("Done Sailing today");
-        //if (effect != HexMovementEffect.None)
-        //{
-        //    GameController.Instance.HandleMovementEffect(hex, effect);
-        //}
-        m_NavigationControlType = NavigationControlType.Planning;
+        else
+        {
+            yield return new WaitForEndOfFrame();
+        }
     }
     public void AddToCurrentShipPath()
     {

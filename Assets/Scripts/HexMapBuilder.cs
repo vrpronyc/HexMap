@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
@@ -53,6 +54,14 @@ public class HexMapBuilder : MonoBehaviour
     public Material m_HexMtl;
 
     Hex[][] m_Hexes;
+    public Hex[][] Hexes
+    {
+        get
+        {
+            return m_Hexes;
+        }
+    }
+
     HexPoint[][] m_HexPoints;
     public HexPoint[][] HexPoints
     {
@@ -65,6 +74,8 @@ public class HexMapBuilder : MonoBehaviour
     Vector3 m_HexMapMin;
     Vector3 m_HexMapMax;
     Vector3 m_HexMapZero;
+
+    public List<Island> m_Islands = new List<Island>();
 
     //HexPointType[][] m_HexPointType;
 
@@ -108,8 +119,8 @@ public class HexMapBuilder : MonoBehaviour
 
     public int m_Width = 12;
     public int m_Height = 10;
-    int m_WidthCount;
-    int m_HeightCount;
+    public int m_WidthCount;
+    public int m_HeightCount;
 
     public float m_Scale = 1.0f;
 
@@ -262,7 +273,7 @@ public class HexMapBuilder : MonoBehaviour
 
         m_HomeIndex = homeIndex;
     }
-    
+
     void AssignRandomSubType(Hex hex)
     {
         if (hex.m_HexVisibility != Hex.HexVisibility.Known)
@@ -278,6 +289,69 @@ public class HexMapBuilder : MonoBehaviour
                 else if (Random.Range(0f, 1f) < m_HexHazardProbability)
                 {
                     hex.SetHexSubType(Hex.HexSubType.Hazard);
+                }
+            }
+        }
+    }
+
+    void AreaFillHexPoints(int ix, int iy, Island island)
+    {
+        if (island.m_HexPoints == null)
+        {
+            island.m_HexPoints = new List<HexPoint>();
+        }
+
+        if (m_HexPoints[iy][ix].m_Island == null)
+        {
+            if (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                if (!island.m_HexPoints.Contains(m_HexPoints[iy][ix]))
+                {
+                    island.m_HexPoints.Add(m_HexPoints[iy][ix]);
+                    m_HexPoints[iy][ix].m_Island = island;
+                }
+
+                for (int i = 0; i < 6; i++)
+                {
+                    int dx = 0;
+                    int dy = 0;
+                    if ((ix & 0x01) == 0)
+                    {
+                        dx = ix + HexPoint.HEX_POINT_NEIGHBOR_DELTA[0][i].i0;
+                        dy = iy + HexPoint.HEX_POINT_NEIGHBOR_DELTA[0][i].i1;
+                    }
+                    else
+                    {
+                        dx = ix + HexPoint.HEX_POINT_NEIGHBOR_DELTA[1][i].i0;
+                        dy = iy + HexPoint.HEX_POINT_NEIGHBOR_DELTA[1][i].i1;
+                    }
+
+                    if ((dx >= 0)
+                        && (dx < m_WidthCount)
+                        && (dy >= 0)
+                        && (dy < m_HeightCount))
+                    {
+                        if (!island.m_HexPoints.Contains(m_HexPoints[dy][dx]))
+                        {
+                            AreaFillHexPoints(dx, dy, island);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    void IdentifyIslands()
+    {
+        for (int iy = 0; iy < m_HeightCount; iy++)
+        {
+            for (int ix = 0; ix < m_WidthCount; ix++)
+            {
+                if ((m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
+                    && (m_HexPoints[iy][ix].m_Island == null))
+                {
+                    Island island = new Island();
+                    m_Islands.Add(island);
+                    AreaFillHexPoints(ix, iy, island);
                 }
             }
         }
@@ -436,7 +510,7 @@ public class HexMapBuilder : MonoBehaviour
     }
 
     void GenerateSubTypes()
-    { 
+    {
         for (int iy = 0; iy < m_Height; iy++)
         {
             for (int ix = 0; ix < m_Width; ix++)
@@ -488,6 +562,7 @@ public class HexMapBuilder : MonoBehaviour
             for (int ix = 0; ix < m_WidthCount; ix++)
             {
                 m_HexPoints[iy][ix] = new HexPoint();
+                m_HexPoints[iy][ix].indeces = new Hex.HexIndexPair(ix, iy);
                 if ((ix & 0x01) == 0)
                 {
                     m_HexPoints[iy][ix].position = new Vector3(((float)ix * xStep) + xOffset, maxHeight - ((float)((iy * 2) + 1) * yStep), 0);
@@ -717,6 +792,15 @@ public class HexMapBuilder : MonoBehaviour
         //NavigationController.Instance.StartPath(m_Home);
 
         ConfigureQuad();
+
+        IdentifyIslands();
+        for (int i = 0; i < m_Islands.Count; i++)
+        {
+            if (m_Islands[i].m_HexPoints.Count > 0)
+            {
+                Debug.Log($"Island {i.ToString()}: {m_Islands[i].m_HexPoints.Count.ToString()}");
+            }
+        }
     }
 
     void SetHexNeighbors()
@@ -1211,5 +1295,73 @@ public class HexMapBuilder : MonoBehaviour
         //{
         //    hex.SetHexVisibility(Hex.HexVisibility.Known);
         //}
+    }
+    public void DumpIslandInfo()
+    {
+        for (int i = 0; i < m_Islands.Count; i++)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"{i.ToString()}: \"{m_Islands[i].m_IslandName}\" HexPoint Count {m_Islands[i].m_HexPoints.Count}\n");
+            for (int j = 0; j < m_Islands[i].m_HexPoints.Count; j++)
+            {
+                HexPoint hp = m_Islands[i].m_HexPoints[j];
+                sb.Append($"i {j.ToString()} ix {hp.indeces.i0.ToString()} iy {hp.indeces.i1.ToString()}\n");
+            }
+
+            Debug.Log(sb.ToString());
+        }
+    }
+    public void DumpIslandAt(int idx)
+    {
+        if ((idx >= 0) && (idx < m_Islands.Count))
+        {
+            Island island = m_Islands[idx];
+            for (int j = 0; j < island.m_HexPoints.Count; j++)
+            {
+                HexPoint hp = island.m_HexPoints[j];
+                Vector3 pos = hp.position;
+                pos = pos + new Vector3(0.25f, -HexMapManager.COS_30 * 0.5f, 0);
+                Vector3 hp0x = pos - new Vector3(0.1f, 0, 0);
+                Vector3 hp1x = pos + new Vector3(0.1f, 0, 0);
+                Vector3 hp0y = pos - new Vector3(0, 0.1f, 0);
+                Vector3 hp1y = pos + new Vector3(0, 0.1f, 0);
+                if (j == 0)
+                {
+                    Debug.DrawLine(hp0x, hp1x, Color.red, 5.0f);
+                    Debug.DrawLine(hp0y, hp1y, Color.red, 5.0f);
+                }
+                else
+                {
+                    Debug.DrawLine(hp0x, hp1x, Color.magenta, 5.0f);
+                    Debug.DrawLine(hp0y, hp1y, Color.magenta, 5.0f);
+                }
+            }
+        }
+    }
+    public void DrawHexPoints()
+    {
+        for (int iy = 0; iy < m_HeightCount; iy++)
+        {
+            for (int ix = 0; ix < m_WidthCount; ix++)
+            {
+                HexPoint hp = m_HexPoints[iy][ix];
+                Vector3 pos = hp.position;
+                pos = pos + new Vector3(0.25f, -HexMapManager.COS_30 * 0.5f, 0);
+                Vector3 hp0x = pos - new Vector3(0.1f, 0, 0);
+                Vector3 hp1x = pos + new Vector3(0.1f, 0, 0);
+                Vector3 hp0y = pos - new Vector3(0, 0.1f, 0);
+                Vector3 hp1y = pos + new Vector3(0, 0.1f, 0);
+                if (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
+                {
+                    Debug.DrawLine(hp0x, hp1x, Color.yellow, 5000.0f);
+                    Debug.DrawLine(hp0y, hp1y, Color.yellow, 5000.0f);
+                }
+                else
+                {
+                    Debug.DrawLine(hp0x, hp1x, Color.cyan, 5000.0f);
+                    Debug.DrawLine(hp0y, hp1y, Color.cyan, 5000.0f);
+                }
+            }
+        }
     }
 }

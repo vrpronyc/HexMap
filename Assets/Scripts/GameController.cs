@@ -162,7 +162,13 @@ public class GameController : MonoBehaviour
             m_DoubloonsText.text = m_ShipManagers[0].GetDoubloons().ToString();
         }
     }
-    void SetShipNameDisplay(string name)
+
+    public void FocusOnShipName()
+    {
+        ModalCanvasController.Instance.ActivateDialog(ShipNameModalController.DIALOG_NAME, null, GetShipName());
+    }
+
+    public void SetShipNameDisplay(string name)
     {
         m_ShipNameInputField.text = name;
     }
@@ -175,6 +181,17 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public string GetShipName()
+    {
+        if (m_CurrentShip != null)
+        {
+            return m_CurrentShip.GetShipName();
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
     public void IncrementDay()
     {
         m_Date += TimeSpan.FromDays(1);
@@ -191,6 +208,29 @@ public class GameController : MonoBehaviour
 
     }
 
+    void SetHexNameFromType(Hex hex)
+    {
+        switch (hex.GetHexSubType())
+        {
+            case Hex.HexSubType.Undefined:
+                if (hex.GetIslandName() == string.Empty)
+                {
+                    NameHex(hex, "this new land");
+                }
+                break;
+            case Hex.HexSubType.Home:
+                NameHex(hex, "your home port");
+                break;
+            case Hex.HexSubType.Waystation:
+                NameHex(hex, "this waystation");
+                break;
+            case Hex.HexSubType.Hazard:
+                NameHex(hex, "this hazard");
+                break;
+            default:
+                break;
+        }
+    }
     public bool HandleMovementEffect(ShipManager ship, Hex hex, NavigationController.HexMovementEffect effect)
     {
         if (hex == null)
@@ -208,9 +248,11 @@ public class GameController : MonoBehaviour
             case NavigationController.HexMovementEffect.None:
                 break;
             case NavigationController.HexMovementEffect.Discovery:
+                SetHexNameFromType(hex);
                 keepSailing = false;
                 break;
             case NavigationController.HexMovementEffect.Sink:
+                SetHexNameFromType(hex);
                 keepSailing = false;
                 break;
             case NavigationController.HexMovementEffect.Dock:
@@ -257,9 +299,44 @@ public class GameController : MonoBehaviour
             SetShipNameDisplay(m_CurrentShip.GetShipName());
 
         }
-
+        StartCoroutine(InitializeGame());
     }
 
+    IEnumerator InitializeGame()
+    {
+        FocusOnShipName();
+        do
+        {
+            yield return new WaitForEndOfFrame();
+        } while (ModalCanvasController.Instance.ModalCanvasActive());
+        NameHex(HexMapBuilder.Instance.m_Home, "your home port");
+    }
+
+    public void NameHex(Hex hex, string message)
+    {
+        ModalCanvasController.Instance.ActivateDialog(HexNameModalController.DIALOG_NAME, SetHexNameCallback, hex, message);
+    }
+
+    void SetHexNameCallback(params object[] args)
+    {
+        if (args.Length < 2)
+        {
+            Debug.LogError("Invalid SetCurrentHexNameCallback");
+            return;
+        }
+        Hex hex = args[0] as Hex;
+        string name = args[1] as string;
+        if (hex == null)
+        {
+            Debug.LogError("Invalid Null Hex SetCurrentHexNameCallback");
+        }
+        else
+        {
+            Hex.HexIndex hi = hex.m_ThisHexIndex;
+            Debug.Log($"Set Hex Name hex [{hi.iy.ToString()}][{hi.ix.ToString()}] name \"{name}\"");
+            hex.SetHexName(name);
+        }
+    }
     public void NextShip()
     {
         if (m_CurrentShip != null)
