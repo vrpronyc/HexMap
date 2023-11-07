@@ -208,24 +208,24 @@ public class GameController : MonoBehaviour
 
     }
 
-    void SetHexNameFromType(Hex hex)
+    void SetHexNameFromType(Hex hex, bool isTitleHex)
     {
         switch (hex.GetHexSubType())
         {
             case Hex.HexSubType.Undefined:
                 if (hex.GetIslandName() == string.Empty)
                 {
-                    NameHex(hex, "this new land");
+                    NameHex(hex, "this new land", isTitleHex);
                 }
                 break;
             case Hex.HexSubType.Home:
-                NameHex(hex, "your home port");
+                NameHex(hex, "your home port", isTitleHex);
                 break;
             case Hex.HexSubType.Waystation:
-                NameHex(hex, "this waystation");
+                NameHex(hex, "this waystation", isTitleHex);
                 break;
             case Hex.HexSubType.Hazard:
-                NameHex(hex, "this hazard");
+                NameHex(hex, "this hazard", isTitleHex);
                 break;
             default:
                 break;
@@ -248,11 +248,11 @@ public class GameController : MonoBehaviour
             case NavigationController.HexMovementEffect.None:
                 break;
             case NavigationController.HexMovementEffect.Discovery:
-                SetHexNameFromType(hex);
+                SetHexNameFromType(hex, true);
                 keepSailing = false;
                 break;
             case NavigationController.HexMovementEffect.Sink:
-                SetHexNameFromType(hex);
+                SetHexNameFromType(hex, true);
                 keepSailing = false;
                 break;
             case NavigationController.HexMovementEffect.Dock:
@@ -309,23 +309,24 @@ public class GameController : MonoBehaviour
         {
             yield return new WaitForEndOfFrame();
         } while (ModalCanvasController.Instance.ModalCanvasActive());
-        NameHex(HexMapBuilder.Instance.m_Home, "your home port");
+        NameHex(HexMapBuilder.Instance.m_Home, "your home port", true);
     }
 
-    public void NameHex(Hex hex, string message)
+    public void NameHex(Hex hex, string message, bool isTitleHex)
     {
-        ModalCanvasController.Instance.ActivateDialog(HexNameModalController.DIALOG_NAME, SetHexNameCallback, hex, message);
+        ModalCanvasController.Instance.ActivateDialog(HexNameModalController.DIALOG_NAME, SetHexNameCallback, hex, message, isTitleHex);
     }
 
     void SetHexNameCallback(params object[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 3)
         {
             Debug.LogError("Invalid SetCurrentHexNameCallback");
             return;
         }
         Hex hex = args[0] as Hex;
         string name = args[1] as string;
+        bool? isTitleHex = args[2] as bool?;
         if (hex == null)
         {
             Debug.LogError("Invalid Null Hex SetCurrentHexNameCallback");
@@ -334,7 +335,11 @@ public class GameController : MonoBehaviour
         {
             Hex.HexIndex hi = hex.m_ThisHexIndex;
             Debug.Log($"Set Hex Name hex [{hi.iy.ToString()}][{hi.ix.ToString()}] name \"{name}\"");
-            hex.SetHexName(name);
+            //if ((isTitleHex != null) && (isTitleHex.Value))
+            //{
+            //    hex.SetHexName(name, isTitleHex.Value);
+            //}
+            hex.SetHexName(name, (isTitleHex == null ? false : isTitleHex.Value));
         }
     }
     public void NextShip()

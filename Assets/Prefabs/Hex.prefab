@@ -96,3 +96,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc0c7a1caccd1bb4885e532225a15de0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_HexSubType: 0
+  m_HexVisibility: 0
+  m_Neighbor:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  m_SeaNeighbor:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  m_TransitionCost: 0000000000000000000000000000000000000000
+  m_ThisHexIndex:
+    ix: 0
+    iy: 0
+  m_HexPointIndeces:
+  - ix: 0
+    iy: 0
+  - ix: 0
+    iy: 0
+  - ix: 0
+    iy: 0
+  - ix: 0
+    iy: 0
+  - ix: 0
+    iy: 0
+  - ix: 0
+    iy: 0
+  - ix: 0
+    iy: 0
+  m_Renderer: {fileID: 0}
+  m_TextureST: {x: 0, y: 0, z: 0, w: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_BackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BlockTextureST: {x: 0, y: 0, z: 0, w: 0}
+  m_BlockColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BlockBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  m_TitleText: {fileID: 0}
+  m_HexMaterial: {fileID: 0}

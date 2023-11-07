@@ -13,6 +13,7 @@ public class HexNameModalController : MonoBehaviour, IModalDialog
     public TextMeshProUGUI m_SetHexInfoText;
     public TMP_InputField m_HexNameInputField;
     public TextMeshProUGUI m_PlaceholderText;
+    bool m_IsTitleHex = false;
     public Button m_ContinueButton;
 
     UnityAction<object[]> m_Callback;
@@ -49,21 +50,25 @@ public class HexNameModalController : MonoBehaviour, IModalDialog
         {
             label = args[1] as string;
         }
+
+        bool? isTitleHex = null;
         if (args.Length > 2)
         {
-            name = args[2] as string;
+            isTitleHex = args[2] as bool?;
         }
         m_SetHexInfoText.text = string.Format(m_Format, label);
         m_PlaceholderText.text = label;
         m_HexNameInputField.text = name;
+        m_IsTitleHex = (isTitleHex == null ? false : isTitleHex.Value);
 
         return true;
     }
     public void OnContinue()
     {
-        object[] args = new object[2];
+        object[] args = new object[3];
         args[0] = m_Hex;
         args[1] = m_HexNameInputField.text;
+        args[2] = m_IsTitleHex;
         Debug.Log($"ABOUT to callback with \"{m_HexNameInputField.text}\"");
         m_Callback(args);
     }

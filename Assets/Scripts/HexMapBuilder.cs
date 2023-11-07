@@ -145,6 +145,8 @@ public class HexMapBuilder : MonoBehaviour
     public Hex m_Home;
     public Hex.HexIndex m_HomeIndex;
 
+    public Transform m_PointParent;
+
     public bool m_DBG = false;
 
     private void Awake()
@@ -551,10 +553,15 @@ public class HexMapBuilder : MonoBehaviour
         float maxHeight = mapHeight * 0.5f;
         float xOffset = -mapWidth * 0.5f * m_Scale;
 
-        GameObject pntParent = new GameObject();
-        pntParent.name = "Points";
-        pntParent.transform.parent = transform;
-        pntParent.SetActive(false);
+        if (m_PointParent == null)
+        {
+            GameObject pntParent = new GameObject();
+            pntParent.name = "Points";
+            //pntParent.SetActive(false);
+            m_PointParent = pntParent.transform;
+        }
+        m_PointParent.parent = transform;
+
         float x = 0;
         float y = 0;
         for (int iy = 0; iy < m_HeightCount; iy++)

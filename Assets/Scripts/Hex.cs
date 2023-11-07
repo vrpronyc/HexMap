@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -118,13 +119,35 @@ public class Hex : MonoBehaviour
     public Color m_BlockColor = Color.white;
     public Color m_BlockBackgroundColor = Color.white;
 
-    int m_UnknownLayer = 0;
-    int m_KnownLayer = 0;
-    int m_DiscoveredLayer = 0;
+    static int m_UnknownLayer = 0;
+    public static int UnknownLayer
+    {
+        get
+        {
+            return m_UnknownLayer;
+        }
+    }
+    static int m_KnownLayer = 0;
+    public static int KnownLayer
+    {
+        get
+        {
+            return m_KnownLayer;
+        }
+    }
+    static int m_DiscoveredLayer = 0;
+    public static int DiscoveredLayer
+    {
+        get
+        {
+            return m_DiscoveredLayer;
+        }
+    }
 
     int m_HexVertexIndex = -1;
 
     string m_HexName = string.Empty;
+    bool m_IsTitleHex = false;
 
     Island m_Island = null;
 
@@ -145,17 +168,19 @@ public class Hex : MonoBehaviour
         return m_Island.m_IslandName;
     }
 
-    public void SetHexName(string name)
+    public void SetHexName(string name, bool isTitleHex)
     {
         m_HexName = name;
         if (GetIslandName() == string.Empty)
         {
+            HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
             if (m_Island == null)
             {
-                HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
                 m_Island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
             }
-            m_Island.m_IslandName = name;
+            HexIndex myHi = this.m_ThisHexIndex;
+            m_Island.SetIslandVisibility(m_HexVisibility);
+            m_Island.SetTitle(name, HexMapBuilder.Instance.Hexes[myHi.iy][myHi.ix], HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix]);
         }
     }
 
@@ -233,6 +258,10 @@ public class Hex : MonoBehaviour
             {
                 HexIndex hi = m_HexPointIndeces[i];
                 HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].pointVisibility = vis;
+            }
+            if(m_Island != null)
+            {
+                m_Island.SetIslandVisibility(vis);
             }
             //Debug.Log($"layer in {vis.ToString()} obj layer {gameObject.layer.ToString()}");
         }
