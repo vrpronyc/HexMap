@@ -9,8 +9,11 @@ public class Island
 {
     [SerializeField]
     public string m_IslandName = string.Empty;
+    //[SerializeField]
+    //public List<HexPoint> m_HexPoints = new List<HexPoint>();
     [SerializeField]
-    public List<HexPoint> m_HexPoints = new List<HexPoint>();
+    public List<Hex.HexIndex> m_HexPointIndeces = new List<Hex.HexIndex>();
+
     [SerializeField]
     public GameObject m_HexPointTitle = null;
     [SerializeField]
@@ -19,6 +22,13 @@ public class Island
 
     HexVisibility m_IslandVisibility = HexVisibility.Unknown;
 
+    [SerializeField]
+    public int m_IslandIndex = -1;
+
+    public void SetIslandName(string islandName)
+    {
+        m_IslandName = islandName;
+    }
     public void SetTitle(string title, Hex hex, HexPoint hexPoint)
     {
         if (m_HexPointTitle != null)

@@ -19,7 +19,7 @@ public class HexQuadController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            Debug.Log($"Got Right Mouse Down");
+            //Debug.Log($"Got Right Mouse Down");
             m_OnRightMouseDown.Invoke();
         }
     }
@@ -28,7 +28,7 @@ public class HexQuadController : MonoBehaviour
     {
         if (!CameraMover.Instance.IsPointerOverUIElement())
         {
-            Debug.Log($"Got Mouse Down");
+            //Debug.Log($"Got Mouse Down");
             m_OnMouseDown.Invoke();
         }
     }

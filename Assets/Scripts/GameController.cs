@@ -4,6 +4,8 @@ using UnityEngine;
 using TMPro;
 using System;
 using UnityEngine.UI;
+using UnityEditor;
+using UnityEngine.Events;
 
 public class GameController : MonoBehaviour
 {
@@ -210,10 +212,20 @@ public class GameController : MonoBehaviour
 
     void SetHexNameFromType(Hex hex, bool isTitleHex)
     {
+        bool unnamedIslandsExist = false;
+        string[] hexPointNames = hex.GetIslandNames();
+        for (int i = 0; i < hexPointNames.Length; i++)
+        {
+            if (!string.IsNullOrEmpty(hexPointNames[i]))
+            {
+                unnamedIslandsExist = true;
+                break;
+            }
+        }
         switch (hex.GetHexSubType())
         {
             case Hex.HexSubType.Undefined:
-                if (hex.GetIslandName() == string.Empty)
+                if (unnamedIslandsExist)
                 {
                     NameHex(hex, "this new land", isTitleHex);
                 }
@@ -314,34 +326,72 @@ public class GameController : MonoBehaviour
 
     public void NameHex(Hex hex, string message, bool isTitleHex)
     {
-        ModalCanvasController.Instance.ActivateDialog(HexNameModalController.DIALOG_NAME, SetHexNameCallback, hex, message, isTitleHex);
+        //ModalCanvasController.Instance.ActivateDialog(HexNameModalController.DIALOG_NAME, SetHexNameCallback, hex, message, isTitleHex);
+        StartCoroutine(NameHexPointIslandsCoroutine(hex, message, isTitleHex));
     }
 
-    void SetHexNameCallback(params object[] args)
+    IEnumerator NameHexPointIslandsCoroutine(Hex hex, string message, bool isTitleHex)
     {
-        if (args.Length < 3)
+        for (int i = 0; i < hex.m_HexPointIndeces.Length; i++)
         {
-            Debug.LogError("Invalid SetCurrentHexNameCallback");
-            return;
+            Hex.HexIndex hi = hex.m_HexPointIndeces[i];
+            HexPoint hp = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix];
+            if (hp != null)
+            {
+                if (hp.hexPointType == HexPoint.HexPointType.Land)
+                {
+                    Island island = hp.m_Island;
+                    if (island != null)
+                    {
+                        if (island.m_IslandName == string.Empty)
+                        {
+                            bool islandWasNamed = false;
+                            UnityAction<object[]> hexNameCallback = (object[] args) =>
+                            {
+                                if (args.Length < 3)
+                                {
+                                    Debug.LogError("Invalid SetCurrentHexNameCallback");
+                                    islandWasNamed = true;
+                                    return;
+                                }
+                                Hex hex = args[0] as Hex;
+                                string name = args[1] as string;
+                                bool? isTitleHex = args[2] as bool?;
+                                if (hex == null)
+                                {
+                                    Debug.LogError("Invalid Null Hex SetCurrentHexNameCallback");
+                                }
+                                else
+                                {
+                                    Hex.HexIndex hi = hex.m_ThisHexIndex;
+                                    Debug.Log($"Set Hex Name hex [{hi.iy.ToString()}][{hi.ix.ToString()}] name \"{name}\"");
+                                    //if ((isTitleHex != null) && (isTitleHex.Value))
+                                    //{
+                                    //    hex.SetHexName(name, isTitleHex.Value);
+                                    //}
+                                    hex.SetHexPointName(hp, name, (isTitleHex == null ? false : isTitleHex.Value));
+                                }
+                                islandWasNamed = true;
+                            };
+
+                            ModalCanvasController.Instance.ActivateDialog(HexNameModalController.DIALOG_NAME, hexNameCallback, hex, message, isTitleHex);
+
+                            while (!islandWasNamed)
+                            {
+                                yield return new WaitForEndOfFrame();
+                            };
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("Bad HexPoint"); 
+            }
         }
-        Hex hex = args[0] as Hex;
-        string name = args[1] as string;
-        bool? isTitleHex = args[2] as bool?;
-        if (hex == null)
-        {
-            Debug.LogError("Invalid Null Hex SetCurrentHexNameCallback");
-        }
-        else
-        {
-            Hex.HexIndex hi = hex.m_ThisHexIndex;
-            Debug.Log($"Set Hex Name hex [{hi.iy.ToString()}][{hi.ix.ToString()}] name \"{name}\"");
-            //if ((isTitleHex != null) && (isTitleHex.Value))
-            //{
-            //    hex.SetHexName(name, isTitleHex.Value);
-            //}
-            hex.SetHexName(name, (isTitleHex == null ? false : isTitleHex.Value));
-        }
+
     }
+
     public void NextShip()
     {
         if (m_CurrentShip != null)

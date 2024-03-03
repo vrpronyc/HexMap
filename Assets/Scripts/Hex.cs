@@ -33,7 +33,17 @@ public class Hex : MonoBehaviour
     Color m_HexSubTypeColorHome = Color.gray;
     Color m_HexSubTypeColorWaystation = Color.green;
     Color m_HexSubTypeColorHazard = Color.red;
-    public HexSubType m_HexSubType = HexSubType.Undefined;
+    public HexSubType m_HexSubType;
+    //public HexSubType[] m_HexSubTypes = new HexSubType[7]
+    //{
+    //    HexSubType.Undefined,
+    //    HexSubType.Undefined,
+    //    HexSubType.Undefined,
+    //    HexSubType.Undefined,
+    //    HexSubType.Undefined,
+    //    HexSubType.Undefined,
+    //    HexSubType.Undefined,
+    //};
 
     [System.Serializable]
     public class HexIndex
@@ -149,38 +159,45 @@ public class Hex : MonoBehaviour
     string m_HexName = string.Empty;
     bool m_IsTitleHex = false;
 
-    Island m_Island = null;
+    //Island m_Island = null;
 
-    public void SetIsland(Island island)
-    {
-        m_Island = island;
-    }
+    //public void SetIsland(Island island)
+    //{
+    //    m_Island = island;
+    //}
 
-    public string GetIslandName()
+    public string[] GetIslandNames()
     {
-        if (m_Island == null)
+        List<string> islandNames = new List<string>();
+        for (int i = 0; i < m_HexPointIndeces.Length; i++)
         {
-            HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
-            m_Island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
-
-            return string.Empty;
-        }
-        return m_Island.m_IslandName;
-    }
-
-    public void SetHexName(string name, bool isTitleHex)
-    {
-        m_HexName = name;
-        if (GetIslandName() == string.Empty)
-        {
-            HexIndex hi = m_HexPointIndeces[HexMapBuilder.CENTER_INDEX];
-            if (m_Island == null)
+            HexIndex hi = m_HexPointIndeces[i];
+            Island island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
+            if (island != null)
             {
-                m_Island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
+                if (!islandNames.Contains(island.m_IslandName))
+                {
+                    islandNames.Add(island.m_IslandName);
+                }
             }
+        }
+        return islandNames.ToArray();
+    }
+
+    public void SetHexPointName(HexPoint hexPoint, string islandName, bool isTitleHex)
+    {
+        m_HexName = islandName;
+        if (hexPoint.m_Island != null)
+        {
             HexIndex myHi = this.m_ThisHexIndex;
-            m_Island.SetIslandVisibility(m_HexVisibility);
-            m_Island.SetTitle(name, HexMapBuilder.Instance.Hexes[myHi.iy][myHi.ix], HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix]);
+            hexPoint.m_Island.SetIslandVisibility(m_HexVisibility);
+            if (isTitleHex)
+            {
+                hexPoint.m_Island.SetTitle(islandName, HexMapBuilder.Instance.Hexes[myHi.iy][myHi.ix], hexPoint);
+            }
+            HexIndexPair islandHip = hexPoint.indeces;
+            hexPoint.m_Island.SetIslandName(islandName);
+            Debug.Log($"SetHexPointName hp {islandHip.i0.ToString()},{islandHip.i1.ToString()} hex {myHi.ix.ToString()},{myHi.iy.ToString()} island idx {hexPoint.m_Island.m_IslandIndex.ToString()}, name {islandName}");
         }
     }
 
@@ -235,6 +252,10 @@ public class Hex : MonoBehaviour
         m_Neighbor[6] = this;
     }
 
+    public HexSubType GetHexSubType()
+    {
+        return (m_HexSubType);
+    }
     public void SetHexVisibility(HexVisibility vis)
     {
         if (m_HexVisibility != vis)
@@ -258,10 +279,11 @@ public class Hex : MonoBehaviour
             {
                 HexIndex hi = m_HexPointIndeces[i];
                 HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].pointVisibility = vis;
-            }
-            if(m_Island != null)
-            {
-                m_Island.SetIslandVisibility(vis);
+                Island island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
+                if (island != null)
+                {
+                    island.SetIslandVisibility(vis);
+                }
             }
             //Debug.Log($"layer in {vis.ToString()} obj layer {gameObject.layer.ToString()}");
         }
@@ -341,31 +363,44 @@ public class Hex : MonoBehaviour
         return (HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexPointType);
     }
 
-    public HexSubType GetHexSubType()
+    public HexSubType[] GetHexSubTypes()
     {
-        return m_HexSubType;
+        HexSubType[] hexSubTypes = new HexSubType[m_HexPointIndeces.Length];
+        for (int i = 0; i < m_HexPointIndeces.Length; i++)
+        {
+            HexIndex hi = m_HexPointIndeces[i];
+            if (hi != null)
+            {
+                hexSubTypes[i] = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType;
+            }
+            else
+            {
+                hexSubTypes[i] = HexSubType.Undefined;
+            }
+        }
+        return hexSubTypes;
     }
     public void SetHexSubType(HexSubType hst)
     {
-        if (hst != m_HexSubType)
-        {
-            m_HexSubType = hst;
-            switch (hst)
-            {
-                case HexSubType.Undefined:
-                    break;
-                case HexSubType.Home:
-                    m_Color = m_HexSubTypeColorHome;
-                    break;
-                case HexSubType.Waystation:
-                    m_Color = m_HexSubTypeColorWaystation;
-                    break;
-                case HexSubType.Hazard:
-                    m_Color = m_HexSubTypeColorHazard;
-                    break;
-                default:
-                    break;
-            }
-        }
+        //if (hst != HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType)
+        //{
+        //    HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType = hst;
+        //    switch (hst)
+        //    {
+        //        case HexSubType.Undefined:
+        //            break;
+        //        case HexSubType.Home:
+        //            m_Color = m_HexSubTypeColorHome;
+        //            break;
+        //        case HexSubType.Waystation:
+        //            m_Color = m_HexSubTypeColorWaystation;
+        //            break;
+        //        case HexSubType.Hazard:
+        //            m_Color = m_HexSubTypeColorHazard;
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //}
     }
 }

@@ -298,18 +298,19 @@ public class HexMapBuilder : MonoBehaviour
 
     void AreaFillHexPoints(int ix, int iy, Island island)
     {
-        if (island.m_HexPoints == null)
+        if (island.m_HexPointIndeces == null)
         {
-            island.m_HexPoints = new List<HexPoint>();
+            island.m_HexPointIndeces = new List<Hex.HexIndex>();
         }
 
         if (m_HexPoints[iy][ix].m_Island == null)
         {
             if (m_HexPoints[iy][ix].hexPointType == HexPoint.HexPointType.Land)
             {
-                if (!island.m_HexPoints.Contains(m_HexPoints[iy][ix]))
+                //if (!island.m_HexPoints.Contains(m_HexPoints[iy][ix]))
+                if (!island.m_HexPointIndeces.Contains(new Hex.HexIndex(ix, iy)))
                 {
-                    island.m_HexPoints.Add(m_HexPoints[iy][ix]);
+                    island.m_HexPointIndeces.Add(new Hex.HexIndex(ix, iy));
                     m_HexPoints[iy][ix].m_Island = island;
                 }
 
@@ -333,7 +334,8 @@ public class HexMapBuilder : MonoBehaviour
                         && (dy >= 0)
                         && (dy < m_HeightCount))
                     {
-                        if (!island.m_HexPoints.Contains(m_HexPoints[dy][dx]))
+                        //if (!island.m_HexPoints.Contains(m_HexPoints[dy][dx]))
+                        if (!island.m_HexPointIndeces.Contains(new Hex.HexIndex(dx, dy)))
                         {
                             AreaFillHexPoints(dx, dy, island);
                         }
@@ -352,6 +354,7 @@ public class HexMapBuilder : MonoBehaviour
                     && (m_HexPoints[iy][ix].m_Island == null))
                 {
                     Island island = new Island();
+                    island.m_IslandIndex = m_Islands.Count;
                     m_Islands.Add(island);
                     AreaFillHexPoints(ix, iy, island);
                 }
@@ -803,9 +806,9 @@ public class HexMapBuilder : MonoBehaviour
         IdentifyIslands();
         for (int i = 0; i < m_Islands.Count; i++)
         {
-            if (m_Islands[i].m_HexPoints.Count > 0)
+            if (m_Islands[i].m_HexPointIndeces.Count > 0)
             {
-                Debug.Log($"Island {i.ToString()}: {m_Islands[i].m_HexPoints.Count.ToString()}");
+                Debug.Log($"Island {i.ToString()}: {m_Islands[i].m_HexPointIndeces.Count.ToString()}");
             }
         }
     }
@@ -1218,50 +1221,50 @@ public class HexMapBuilder : MonoBehaviour
         yield return 0;
     }
 
-    public void MoveDiscoveredHexesToKnownHexes()
-    {
-        for (int iy = 0; iy < m_Height; iy++)
-        {
-            for (int ix = 0; ix < m_Width; ix++)
-            {
-                if (m_Hexes[iy][ix].m_HexVisibility == Hex.HexVisibility.Discovered)
-                {
-                    Hex.HexSubType subType = m_Hexes[iy][ix].GetHexSubType();
-                    m_Hexes[iy][ix].SetHexVisibility(Hex.HexVisibility.Known);
-                    for (int e = 0; e < m_Hexes[iy][ix].m_HexPointIndeces.Length; e++)
-                    {
-                        Hex.HexIndex hi = m_Hexes[iy][ix].m_HexPointIndeces[e];
-                        if (hi != null)
-                        {
-                            m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
-                        }
-                    }
-                    SetDecal(m_Hexes[iy][ix]);
-                }
-            }
-        }
-    }
+    //public void MoveDiscoveredHexesToKnownHexes()
+    //{
+    //    for (int iy = 0; iy < m_Height; iy++)
+    //    {
+    //        for (int ix = 0; ix < m_Width; ix++)
+    //        {
+    //            if (m_Hexes[iy][ix].m_HexVisibility == Hex.HexVisibility.Discovered)
+    //            {
+    //                Hex.HexSubType subType = m_Hexes[iy][ix].GetHexSubType();
+    //                m_Hexes[iy][ix].SetHexVisibility(Hex.HexVisibility.Known);
+    //                for (int e = 0; e < m_Hexes[iy][ix].m_HexPointIndeces.Length; e++)
+    //                {
+    //                    Hex.HexIndex hi = m_Hexes[iy][ix].m_HexPointIndeces[e];
+    //                    if (hi != null)
+    //                    {
+    //                        m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
+    //                    }
+    //                }
+    //                SetDecal(m_Hexes[iy][ix]);
+    //            }
+    //        }
+    //    }
+    //}
 
     public void MoveDiscoveredHexesFromListToKnownHexes(List<Hex> discoveredHexes)
     {
-        for (int i = 0; i < discoveredHexes.Count; i++)
-        {
-            Hex hex = discoveredHexes[i];
-            if (hex.m_HexVisibility == Hex.HexVisibility.Discovered)
-            {
-                Hex.HexSubType subType = hex.GetHexSubType();
-                hex.SetHexVisibility(Hex.HexVisibility.Known);
-                for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
-                {
-                    Hex.HexIndex hi = hex.m_HexPointIndeces[e];
-                    if (hi != null)
-                    {
-                        m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
-                    }
-                }
-                SetDecal(hex);
-            }
-        }
+        //for (int i = 0; i < discoveredHexes.Count; i++)
+        //{
+        //    Hex hex = discoveredHexes[i];
+        //    if (hex.m_HexVisibility == Hex.HexVisibility.Discovered)
+        //    {
+        //        Hex.HexSubType subType = hex.GetHexSubType();
+        //        hex.SetHexVisibility(Hex.HexVisibility.Known);
+        //        for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
+        //        {
+        //            Hex.HexIndex hi = hex.m_HexPointIndeces[e];
+        //            if (hi != null)
+        //            {
+        //                m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
+        //            }
+        //        }
+        //        SetDecal(hex);
+        //    }
+        //}
     }
 
     public void RegenerateUnknownHexes()
@@ -1308,10 +1311,12 @@ public class HexMapBuilder : MonoBehaviour
         for (int i = 0; i < m_Islands.Count; i++)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append($"{i.ToString()}: \"{m_Islands[i].m_IslandName}\" HexPoint Count {m_Islands[i].m_HexPoints.Count}\n");
-            for (int j = 0; j < m_Islands[i].m_HexPoints.Count; j++)
+            sb.Append($"{i.ToString()}: \"{m_Islands[i].m_IslandName}\" HexPoint Count {m_Islands[i].m_HexPointIndeces.Count}\n");
+            for (int j = 0; j < m_Islands[i].m_HexPointIndeces.Count; j++)
             {
-                HexPoint hp = m_Islands[i].m_HexPoints[j];
+                Hex.HexIndex hi = m_Islands[i].m_HexPointIndeces[j];
+                HexPoint hp = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix];
+
                 sb.Append($"i {j.ToString()} ix {hp.indeces.i0.ToString()} iy {hp.indeces.i1.ToString()}\n");
             }
 
@@ -1323,9 +1328,10 @@ public class HexMapBuilder : MonoBehaviour
         if ((idx >= 0) && (idx < m_Islands.Count))
         {
             Island island = m_Islands[idx];
-            for (int j = 0; j < island.m_HexPoints.Count; j++)
+            for (int j = 0; j < island.m_HexPointIndeces.Count; j++)
             {
-                HexPoint hp = island.m_HexPoints[j];
+                Hex.HexIndex hi = island.m_HexPointIndeces[j];
+                HexPoint hp = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix];
                 Vector3 pos = hp.position;
                 pos = pos + new Vector3(0.25f, -HexMapManager.COS_30 * 0.5f, 0);
                 Vector3 hp0x = pos - new Vector3(0.1f, 0, 0);
