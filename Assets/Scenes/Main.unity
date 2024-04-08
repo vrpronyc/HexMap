@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -785,7 +785,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.25
+  m_fontSize: 12.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -922,7 +922,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
+  m_fontSize: 17
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3668,7 +3668,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.95
+  m_fontSize: 25.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4060,7 +4060,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.95
+  m_fontSize: 25.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4737,9 +4737,11 @@ MonoBehaviour:
   m_HexPicked: {fileID: 0}
   m_HexNeighborDwellTime: 1
   m_Home: {fileID: 0}
+  m_HomeTri: 0
   m_HomeIndex:
     ix: 0
     iy: 0
+    hexPointMask: 0
   m_PointParent: {fileID: 0}
   m_DBG: 0
 --- !u!4 &740631224
@@ -5333,7 +5335,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
+  m_fontSize: 17
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5892,7 +5894,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.25
+  m_fontSize: 12.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6958,7 +6960,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.95
+  m_fontSize: 25.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -8074,7 +8076,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17.35
+  m_fontSize: 14.35
   m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -8675,7 +8677,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.95
+  m_fontSize: 25.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -9197,7 +9199,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.05
+  m_fontSize: 25.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -11070,7 +11072,7 @@ MonoBehaviour:
     m_HexEdge6NeighborsProbability: 0
   - m_HexLandProbability: 0
     m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.083333336
+    m_HexEdge1NeighborsProbability: 0.01
     m_HexEdge2NeighborsProbability: 0
     m_HexEdge3NeighborsProbability: 0
     m_HexEdge4NeighborsProbability: 0
@@ -11078,52 +11080,12 @@ MonoBehaviour:
     m_HexEdge6NeighborsProbability: 0
   - m_HexLandProbability: 0
     m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.1
-    m_HexEdge2NeighborsProbability: 0.08333334
-    m_HexEdge3NeighborsProbability: 0.08333334
-    m_HexEdge4NeighborsProbability: 0.08333334
-    m_HexEdge5NeighborsProbability: 0.08333334
-    m_HexEdge6NeighborsProbability: 0.08333334
-  - m_HexLandProbability: 0
-    m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.08333334
-    m_HexEdge2NeighborsProbability: 0.1
-    m_HexEdge3NeighborsProbability: 0.08333334
-    m_HexEdge4NeighborsProbability: 0.08333334
-    m_HexEdge5NeighborsProbability: 0.08333334
-    m_HexEdge6NeighborsProbability: 0.08333334
-  - m_HexLandProbability: 0
-    m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.08333334
-    m_HexEdge2NeighborsProbability: 0.08333334
-    m_HexEdge3NeighborsProbability: 0.1
-    m_HexEdge4NeighborsProbability: 0.08333334
-    m_HexEdge5NeighborsProbability: 0.08333334
-    m_HexEdge6NeighborsProbability: 0.08333334
-  - m_HexLandProbability: 0
-    m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.08333334
-    m_HexEdge2NeighborsProbability: 0.08333334
-    m_HexEdge3NeighborsProbability: 0.08333334
-    m_HexEdge4NeighborsProbability: 0.1
-    m_HexEdge5NeighborsProbability: 0.08333334
-    m_HexEdge6NeighborsProbability: 0.08333334
-  - m_HexLandProbability: 0
-    m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.08333334
-    m_HexEdge2NeighborsProbability: 0.08333334
-    m_HexEdge3NeighborsProbability: 0.08333334
-    m_HexEdge4NeighborsProbability: 0.08333334
-    m_HexEdge5NeighborsProbability: 0.1
-    m_HexEdge6NeighborsProbability: 0.08333334
-  - m_HexLandProbability: 0.02
-    m_HexEdge0NeighborsProbability: 0
-    m_HexEdge1NeighborsProbability: 0.08333334
-    m_HexEdge2NeighborsProbability: 0.08333334
-    m_HexEdge3NeighborsProbability: 0.08333334
-    m_HexEdge4NeighborsProbability: 0.08333334
-    m_HexEdge5NeighborsProbability: 0.08333334
-    m_HexEdge6NeighborsProbability: 0.1
+    m_HexEdge1NeighborsProbability: 0.01
+    m_HexEdge2NeighborsProbability: 0
+    m_HexEdge3NeighborsProbability: 0
+    m_HexEdge4NeighborsProbability: 0
+    m_HexEdge5NeighborsProbability: 0
+    m_HexEdge6NeighborsProbability: 0
   m_HexWaystationProbability: 0.1
   m_HexHazardProbability: 0.1
   m_HexMapResourcePath: HexMap_
@@ -11149,9 +11111,11 @@ MonoBehaviour:
   m_HexPicked: {fileID: 0}
   m_HexNeighborDwellTime: 1
   m_Home: {fileID: 0}
+  m_HomeTri: 0
   m_HomeIndex:
     ix: 0
     iy: 0
+    hexPointMask: 0
   m_PointParent: {fileID: 0}
   m_DBG: 0
 --- !u!4 &1728522346
@@ -11783,7 +11747,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
+  m_fontSize: 17
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
