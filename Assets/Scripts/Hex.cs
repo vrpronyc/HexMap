@@ -50,15 +50,18 @@ public class Hex : MonoBehaviour
     {
         public int ix;
         public int iy;
+        public int hexPointMask;
         public HexIndex()
         {
             ix = 0;
             iy = 0;
+            hexPointMask = 0;
         }
         public HexIndex(int x, int y)
         {
             ix = x;
             iy = y;
+            hexPointMask = 0;
         }
     };
     public class HexIndexPair
@@ -114,7 +117,7 @@ public class Hex : MonoBehaviour
 
     public HexVisibility m_HexVisibility = HexVisibility.Undefined;
     public Hex[] m_Neighbor = new Hex[7] { null, null, null, null, null, null, null };
-    public Hex[] m_SeaNeighbor = new Hex[7] { null, null, null, null, null, null, null };
+    //public Hex[] m_SeaNeighbor = new Hex[7] { null, null, null, null, null, null, null };
     public int[] m_TransitionCost = new int[] { 0, 0, 0, 0, 0, };
 
     public HexIndex m_ThisHexIndex;
@@ -322,17 +325,17 @@ public class Hex : MonoBehaviour
             m_Neighbor[i] = neighbors[i];
         }
     }
-    public void SetSeaNeighbors(Hex[] neighbors)
-    {
-        if ((neighbors == null) || (neighbors.Length != 6))
-        {
-            Debug.LogError("Bad neighbors list");
-        }
-        for (int i = 0; i < neighbors.Length; i++)
-        {
-            m_SeaNeighbor[i] = neighbors[i];
-        }
-    }
+    //public void SetSeaNeighbors(Hex[] neighbors)
+    //{
+    //    if ((neighbors == null) || (neighbors.Length != 6))
+    //    {
+    //        Debug.LogError("Bad neighbors list");
+    //    }
+    //    for (int i = 0; i < neighbors.Length; i++)
+    //    {
+    //        m_SeaNeighbor[i] = neighbors[i];
+    //    }
+    //}
 
     public Vector3 GetHexPosition()
     {

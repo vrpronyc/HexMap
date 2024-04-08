@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static NavigationController;
 
 public class ShipManager : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class ShipManager : MonoBehaviour
     }
 
     List<Hex> m_DiscoveredHexes;
+
+    HexPosition m_CurrentHexPosition;
 
     List<NavigationController.PathEntry> m_Path;
     public List<NavigationController.PathEntry> GetPath()
@@ -65,6 +68,15 @@ public class ShipManager : MonoBehaviour
     public void SetShipIndex(int idx)
     {
         m_ShipIndex = idx;
+    }
+
+    public void SetShipLocation(HexPosition hexPosition)
+    {
+        m_CurrentHexPosition = hexPosition;
+    }
+    public HexPosition GetShipLocation()
+    {
+        return m_CurrentHexPosition;
     }
     public void SetShipLayer(int layer)
     {

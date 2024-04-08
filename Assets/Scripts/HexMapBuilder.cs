@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Xml;
 using UnityEngine;
 
 public class HexMapBuilder : MonoBehaviour
@@ -143,6 +144,7 @@ public class HexMapBuilder : MonoBehaviour
     public float m_HexNeighborDwellTime = 0.1f;
 
     public Hex m_Home;
+    public NavigationController.HexTri m_HomeTri;
     public Hex.HexIndex m_HomeIndex;
 
     public Transform m_PointParent;
@@ -263,6 +265,7 @@ public class HexMapBuilder : MonoBehaviour
                 {
                     homeIndex = neighbor.m_ThisHexIndex;
                     m_Home = neighbor;
+                    m_HomeTri = NavigationController.HexTri.N;
                 }
             }
         }
@@ -378,7 +381,7 @@ public class HexMapBuilder : MonoBehaviour
         {
             for (int ix = 0; ix < m_Width; ix++)
             {
-                SetDecal(m_Hexes[iy][ix]);
+                SetDecalAndHexPointMask(m_Hexes[iy][ix]);
             }
         }
 
@@ -768,10 +771,11 @@ public class HexMapBuilder : MonoBehaviour
 
                 hex.SetHexVisibility(Hex.HexVisibility.Unknown);
 
-                SetDecal(hex);
-
                 hex.m_ThisHexIndex = new Hex.HexIndex(ix, iy);
                 m_Hexes[iy][ix] = hex;
+
+                SetDecalAndHexPointMask(hex);
+
             }
         }
 
@@ -795,7 +799,7 @@ public class HexMapBuilder : MonoBehaviour
                 {
                     Debug.Log("Check it");
                 }
-                SetDecal(m_Hexes[iy][ix]);
+                SetDecalAndHexPointMask(m_Hexes[iy][ix]);
             }
         }
         m_Hexes[m_HomeIndex.iy][m_HomeIndex.ix].SetHexSubType(Hex.HexSubType.Home);
@@ -945,34 +949,41 @@ public class HexMapBuilder : MonoBehaviour
 
                 //m_Hexes[iy][ix].SetNeighbors(neighbors);
 
-                Hex[] seaNeighbors = new Hex[6];
-                for (int i = 0; i < neighbors.Length; i++)
-                {
-                    if (neighbors[i] == null)
-                    {
-                        seaNeighbors[i] = null;
-                    }
-                    else
-                    {
-                        Hex.HexIndexPair hexIP = m_Hexes[iy][ix].m_HexEdges[i];
-                        Hex.HexIndex hiA = m_Hexes[iy][ix].m_HexPointIndeces[hexIP.i0];
-                        Hex.HexIndex hiB = m_Hexes[iy][ix].m_HexPointIndeces[hexIP.i1];
-                        if ((m_HexPoints[hiA.iy][hiA.ix].hexPointType == HexPoint.HexPointType.Land)
-                         && (m_HexPoints[hiB.iy][hiB.ix].hexPointType == HexPoint.HexPointType.Land))
-                        {
-                            seaNeighbors[i] = null;
-                        }
-                        else
-                        {
-                            seaNeighbors[i] = neighbors[i];
-                        }
-                    }
-                }
-                m_Hexes[iy][ix].SetSeaNeighbors(seaNeighbors);
+                //Hex[] seaNeighbors = new Hex[6];
+                //for (int i = 0; i < neighbors.Length; i++)
+                //{
+                //    if (neighbors[i] == null)
+                //    {
+                //        seaNeighbors[i] = null;
+                //    }
+                //    else
+                //    {
+                //        Hex hex = m_Hexes[iy][ix];
+                //        // Test for valid hexTri movement
+                //        // Can we get from our current hextri to this neighbor?
+                //        if ((NavigationController.m_TravelIsPossible[hex.m_ThisHexIndex.hexPointMask][i] & neighborBit) == neighborBit)
+                //        {
+
+                //        }
+                //        //Hex.HexIndexPair hexIP = m_Hexes[iy][ix].m_HexEdges[i];
+                //        //Hex.HexIndex hiA = m_Hexes[iy][ix].m_HexPointIndeces[hexIP.i0];
+                //        //Hex.HexIndex hiB = m_Hexes[iy][ix].m_HexPointIndeces[hexIP.i1];
+                //        //if ((m_HexPoints[hiA.iy][hiA.ix].hexPointType == HexPoint.HexPointType.Land)
+                //        // && (m_HexPoints[hiB.iy][hiB.ix].hexPointType == HexPoint.HexPointType.Land))
+                //        //{
+                //        //    seaNeighbors[i] = null;
+                //        //}
+                //        //else
+                //        //{
+                //        //    seaNeighbors[i] = neighbors[i];
+                //        //}
+                //    }
+                //}
+                //m_Hexes[iy][ix].SetSeaNeighbors(seaNeighbors);
             }
         }
     }
-    void SetDecal(Hex hex)
+    void SetDecalAndHexPointMask(Hex hex)
     {
         //int index = 0;
         //for (int i = 0; i < hex.m_HexPointIndeces.Length; i++)
@@ -1043,6 +1054,24 @@ public class HexMapBuilder : MonoBehaviour
             //        }
             //    }
             //}
+        }
+
+        int maskBits = 0;
+        for (int i = 0; i < 7; i++)
+        {
+            Hex.HexIndex hpIdx = hex.m_HexPointIndeces[i];
+            if (m_HexPoints[hpIdx.iy][hpIdx.ix].hexPointType == HexPoint.HexPointType.Land)
+            {
+                maskBits = maskBits | (1 << i);
+            }
+        }
+        if (hex.m_ThisHexIndex == null)
+        {
+            Debug.LogError("m_ThisHexIndex null, cant set hexPointMask");
+        }
+        else
+        {
+            hex.m_ThisHexIndex.hexPointMask = maskBits;
         }
     }
     void ConfigureQuad()

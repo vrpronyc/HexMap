@@ -21,8 +21,43 @@ public class NavigationController : MonoBehaviour
     //     There is a byte for each subtriangle.
     //     Each bit of the byte, from bit 0 to bit 5, is 1 if travel is possible.  Otherwise 0.
     //
-
-    byte[][] m_TravelIsPossible = new byte[][]
+    public enum HexTri 
+    { 
+        Unknown = -1, 
+        NW = 0, 
+        N = 1, 
+        NE = 2, 
+        SE = 3, 
+        S = 4, 
+        SW = 5,
+        NumHexTri = 6 // keep this last in list, with accurate count
+    };
+    // HexTri that is across from neighbor n
+    public static HexTri[] m_CorrespondingNeighborTri =
+    {
+        HexTri.SE,
+        HexTri.S,
+        HexTri.SW,
+        HexTri.NW,
+        HexTri.N,
+        HexTri.NE,
+    };
+    public class HexPosition
+    {
+        public Hex hex;
+        public HexTri hexTri;
+        public HexPosition(Hex hex, HexTri hexTri)
+        {
+            this.hex = hex;
+            this.hexTri = hexTri;
+        }
+        public HexPosition()
+        {
+            hex = null;
+            hexTri = HexTri.Unknown;
+        }
+    }
+    public static byte[][] m_TravelIsPossible = new byte[][]
     {
        /* Hex 0*/ new byte[]
        {
@@ -1215,6 +1250,7 @@ public class NavigationController : MonoBehaviour
     public class PathEntry
     {
         public Hex hex;
+        public HexTri hexTri; 
         public GameObject marker;
     }
     //List<PathEntry> m_Path;
@@ -1237,15 +1273,15 @@ public class NavigationController : MonoBehaviour
         
     }
 
-    public void StartPath(Hex hex, ShipManager shipManager)
+    public void StartPath(Hex hex, HexTri hexTri, ShipManager shipManager)
     {
         //ClearPath(GameController.Instance.m_CurrentShip);
         //AddHexToPath(hex);
         ClearPath(shipManager);
-        AddHexToPath(hex, shipManager);
-        
+        AddHexToPath(hex, shipManager, hexTri);
+        shipManager.SetShipLocation(new HexPosition(hex, hexTri));
     }
-    bool HexIsValid(Hex hex)
+    bool HexIsValid(Hex hex, HexTri hexTri)
     {
         if (GameController.Instance.m_CurrentShip == null)
         {
@@ -1260,29 +1296,86 @@ public class NavigationController : MonoBehaviour
         {
             return true;
         }
-        Hex lastHex = path[path.Count - 1].hex;
-        if (hex == lastHex)
+        Hex prevHex = path[path.Count - 1].hex;
+        if (hex == prevHex)
         {
             return false;
         }
-        for (int i = 0; i < lastHex.m_SeaNeighbor.Length; i++)
+        HexTri prevHexTri = path[path.Count - 1].hexTri;
+        if (prevHexTri == HexTri.Unknown)
         {
-            if (hex == lastHex.m_SeaNeighbor[i])
+            return false;
+        }
+        // Need to test "sea neighbor" only if the prev hex is already discovered
+        if (prevHex.m_HexVisibility == Hex.HexVisibility.Discovered)
+        {
+            for (int i = 0; i < prevHex.m_Neighbor.Length; i++)
             {
-                return true;
+                if (hex == prevHex.m_Neighbor[i])
+                {
+                    // need to see if there is access to this hex
+                    int hexTravelIndex = prevHex.m_ThisHexIndex.hexPointMask;
+//                    int correspondingIdx = (int)m_CorrespondingNeighborTri[i];
+                    byte bitMask = (byte)(1 << i);
+                    if ((m_TravelIsPossible[hexTravelIndex][(int)prevHexTri] & bitMask) != bitMask)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
             }
         }
+        else
+        {
+            for (int i = 0; i < prevHex.m_Neighbor.Length; i++)
+            {
+                if (hex == prevHex.m_Neighbor[i])
+                {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
-    void AddHexToPath(Hex hex, ShipManager shipManager)
+    void AddHexToPath(Hex hex, ShipManager shipManager, HexTri hexTri)
     {
+        bool determineHexTri = false;
+
         if (shipManager == null)
         {
             return;
         }
         Transform parent = shipManager.transform;
         List<NavigationController.PathEntry> path = shipManager.GetPath();
-        if (HexIsValid(hex))
+
+        if ((path.Count == 0) && (hexTri == HexTri.Unknown))
+        {
+            Debug.LogError("Adding unknown HexTri to empty path");
+            return;
+        }
+        else
+        {
+            if (hexTri == HexTri.Unknown)
+            {
+                determineHexTri = true;
+                PathEntry prevPathEntry = path[path.Count - 1];
+                Hex prevHex = prevPathEntry.hex;
+                for (int i = 0; i < (int)HexTri.NumHexTri; i++)
+                {
+                    if (hex == prevHex.m_Neighbor[i])
+                    {
+                        hexTri = (HexTri)i;
+                        break;
+                    }
+                }
+                if (hexTri == HexTri.Unknown)
+                {
+                    return;
+                }
+            }
+        }
+        if (HexIsValid(hex, hexTri))
         {
             GameObject go = Instantiate(m_HexPathPrefab);
             go.layer = shipManager.m_ShipLayer;
@@ -1301,6 +1394,16 @@ public class NavigationController : MonoBehaviour
             go.name = "path_" + path.Count.ToString();
             PathEntry entry = new PathEntry();
             entry.hex = hex;
+
+            // If we needed to deterineHexTri, hexTri represents where we're coming from.
+            if (determineHexTri)
+            {
+                entry.hexTri = m_CorrespondingNeighborTri[(int)hexTri];
+            }
+            else
+            {
+                entry.hexTri = hexTri;
+            }
             entry.marker = go;
             hpc.SetLabel(path.Count.ToString());
             path.Add(entry);
@@ -1327,8 +1430,10 @@ public class NavigationController : MonoBehaviour
         {
             List<PathEntry> path = GameController.Instance.m_CurrentShip.GetPath();
             Hex hex = path[0].hex;
+            HexTri hexTri = path[0].hexTri;
             ClearPath(GameController.Instance.m_CurrentShip);
-            AddHexToPath(hex, GameController.Instance.m_CurrentShip);
+            AddHexToPath(hex, GameController.Instance.m_CurrentShip, hexTri);
+            GameController.Instance.m_CurrentShip.SetShipLocation(new HexPosition(hex, hexTri));
         }
     }
 
@@ -1364,8 +1469,9 @@ public class NavigationController : MonoBehaviour
         StartCoroutine(SailCoroutine());
     }
 
-    HexMovementEffect MoveToHex(ShipManager ship, Hex hex)
+    HexMovementEffect MoveToHex(ShipManager ship, Hex hex, HexTri hexTri)
     {
+        ship.SetShipLocation(new HexPosition(hex, hexTri));
         if (hex == null)
         {
             return HexMovementEffect.None;
@@ -1408,6 +1514,7 @@ public class NavigationController : MonoBehaviour
             bool keepSailing = true; // If anything happens to any ship, we'll stop the coroutine
             int iDayCount = 0;
             Hex hex = null;
+            HexTri hexTri = HexTri.Unknown;
             while (keepSailing)
             {
                 if (iDayCount > 0)
@@ -1430,29 +1537,37 @@ public class NavigationController : MonoBehaviour
                         continue;
                     }
                     hex = path[0].hex;
-                    effect = MoveToHex(ship, hex);
-                    //if ((iDayCount > 0) && (effect != HexMovementEffect.None)) // day 0 is just a repeat of the prior route's last day
-                    if (iDayCount > 0) // day 0 is just a repeat of the prior route's last day
+                    hexTri = path[0].hexTri;
+                    if (hex == null)
                     {
-                        //keepSailing = false;
-                        //GameController.Instance.HandleMovementEffect(ship, hex, effect);
-                        keepSailing = GameController.Instance.HandleMovementEffect(ship, hex, effect);
-                    }
-
-                    if ((path.Count == 1) || !keepSailing)
-                    {
-                        ClearPath(ship);
-                        if (hex != null)
-                        {
-                            AddHexToPath(hex, ship);
-                        }
                         keepSailing = false;
+                        Debug.LogError("Moving to NULL hex");
                     }
                     else
                     {
-                        ClearPathSteps(ship, 1);
-                    }
+                        effect = MoveToHex(ship, hex, hexTri);
+                        //if ((iDayCount > 0) && (effect != HexMovementEffect.None)) // day 0 is just a repeat of the prior route's last day
+                        if (iDayCount > 0) // day 0 is just a repeat of the prior route's last day
+                        {
+                            //keepSailing = false;
+                            //GameController.Instance.HandleMovementEffect(ship, hex, effect);
+                            keepSailing = GameController.Instance.HandleMovementEffect(ship, hex, effect);
+                        }
 
+                        if ((path.Count == 1) || !keepSailing)
+                        {
+                            ClearPath(ship);
+                            if (hex != null)
+                            {
+                                AddHexToPath(hex, ship, hexTri);
+                            }
+                            keepSailing = false;
+                        }
+                        else
+                        {
+                            ClearPathSteps(ship, 1);
+                        }
+                    }
                 }
                 if (!keepSailing)
                 {
@@ -1494,9 +1609,10 @@ public class NavigationController : MonoBehaviour
         }
 
         Hex hex = HexMapBuilder.Instance.FetchHexFromClickPoint();
+
         if (hex != null)
         {
-            AddHexToPath(hex, shipManager);
+            AddHexToPath(hex, shipManager, HexTri.Unknown);
         }
     }
 }

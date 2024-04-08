@@ -295,7 +295,7 @@ public class GameController : MonoBehaviour
         UpdateDateTimeDisplay();
         for (int i = 0; i < m_ShipManagers.Count; i++)
         {
-            NavigationController.Instance.StartPath(HexMapBuilder.Instance.m_Home, m_ShipManagers[i]);
+            NavigationController.Instance.StartPath(HexMapBuilder.Instance.m_Home, HexMapBuilder.Instance.m_HomeTri, m_ShipManagers[i]);
         }
         if (m_ShipManagers.Count > 0)
         {
