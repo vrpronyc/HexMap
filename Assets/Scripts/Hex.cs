@@ -33,7 +33,8 @@ public class Hex : MonoBehaviour
     Color m_HexSubTypeColorHome = Color.gray;
     Color m_HexSubTypeColorWaystation = Color.green;
     Color m_HexSubTypeColorHazard = Color.red;
-    public HexSubType m_HexSubType;
+    [SerializeField]
+    private HexSubType m_HexSubType;
     //public HexSubType[] m_HexSubTypes = new HexSubType[7]
     //{
     //    HexSubType.Undefined,
@@ -366,27 +367,66 @@ public class Hex : MonoBehaviour
         return (HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexPointType);
     }
 
-    public HexSubType[] GetHexSubTypes()
-    {
-        HexSubType[] hexSubTypes = new HexSubType[m_HexPointIndeces.Length];
-        for (int i = 0; i < m_HexPointIndeces.Length; i++)
-        {
-            HexIndex hi = m_HexPointIndeces[i];
-            if (hi != null)
-            {
-                hexSubTypes[i] = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType;
-            }
-            else
-            {
-                hexSubTypes[i] = HexSubType.Undefined;
-            }
-        }
-        return hexSubTypes;
-    }
+    //public HexSubType[] GetHexSubTypes()
+    //{
+    //    HexSubType[] hexSubTypes = new HexSubType[m_HexPointIndeces.Length];
+    //    for (int i = 0; i < m_HexPointIndeces.Length; i++)
+    //    {
+    //        HexIndex hi = m_HexPointIndeces[i];
+    //        if (hi != null)
+    //        {
+    //            hexSubTypes[i] = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType;
+    //        }
+    //        else
+    //        {
+    //            hexSubTypes[i] = HexSubType.Undefined;
+    //        }
+    //    }
+    //    return hexSubTypes;
+    //}
     public void SetHexSubType(HexSubType hst)
     {
+        HexIndex hi = m_ThisHexIndex;
+
+        if ((hi.iy == 48) && (hi.ix == 50))
+        {
+            Debug.LogError($"SetHexSubType change HOME to {hst.ToString()}");
+        }
+        if (hst == HexSubType.Home)
+        {
+            Debug.LogError($"SetHexSubType change to HOME for Hex_{hi.iy.ToString()}_{hi.ix.ToString()}");
+        }
+
+        //if (hst != HexMapBuilder.Instance.Hexes[hi.iy][hi.ix].GetHexSubType())
+        if (hst != m_HexSubType)
+        {
+            m_HexSubType = hst;
+            switch (hst)
+            {
+                case HexSubType.Undefined:
+                    break;
+                case HexSubType.Home:
+                    m_Color = m_HexSubTypeColorHome;
+                    break;
+                case HexSubType.Waystation:
+                    m_Color = m_HexSubTypeColorWaystation;
+                    break;
+                case HexSubType.Hazard:
+                    m_Color = m_HexSubTypeColorHazard;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         //if (hst != HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType)
         //{
+        //    if (HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType == HexSubType.Home)
+        //    {
+        //        Debug.LogError("About to change HOME");
+        //    }
+
+
         //    HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].hexSubType = hst;
         //    switch (hst)
         //    {

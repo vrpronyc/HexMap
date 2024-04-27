@@ -274,12 +274,33 @@ public class GameController : MonoBehaviour
                         HexMapBuilder.Instance.MoveDiscoveredHexesFromListToKnownHexes(ship.GetDiscoveredHexes());
                         HexMapBuilder.Instance.RegenerateUnknownHexes();
                     }
-                    else if ((hex.GetHexCenterPointType() == HexPoint.HexPointType.Land)
-                        && (hex.m_HexVisibility == Hex.HexVisibility.Known)
+                    //else if ((hex.GetHexCenterPointType() == HexPoint.HexPointType.Land)
+                    //    && (hex.m_HexVisibility == Hex.HexVisibility.Known)
+                    //    && (hex.GetHexSubType() == Hex.HexSubType.Waystation))
+                    else if ((hex.m_HexVisibility == Hex.HexVisibility.Known)
                         && (hex.GetHexSubType() == Hex.HexSubType.Waystation))
                     {
                         HexMapBuilder.Instance.MoveDiscoveredHexesFromListToKnownHexes(ship.GetDiscoveredHexes());
                         HexMapBuilder.Instance.RegenerateUnknownHexes();
+                    }
+                    else if (hex.m_HexVisibility != Hex.HexVisibility.Known)
+                    {
+                        // is there an unnamed island?
+                        Hex.HexIndex[] hiList = hex.m_HexPointIndeces;
+                        for (int i = 0; i < hiList.Length; i++)
+                        {
+                            Hex.HexIndex hi = hiList[i];
+                            if (HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island != null)
+                            {
+                                Island island = HexMapBuilder.Instance.HexPoints[hi.iy][hi.ix].m_Island;
+                                if (island.IslandVisibility == Hex.HexVisibility.Unknown)
+                                {
+                                    island.SetIslandVisibility(Hex.HexVisibility.Discovered);
+                                    SetHexNameFromType(hex, true);
+                                    break;
+                                }
+                            }
+                        }
                     }
                     keepSailing = false;
                 }

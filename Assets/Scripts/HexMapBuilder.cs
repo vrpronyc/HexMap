@@ -795,7 +795,7 @@ public class HexMapBuilder : MonoBehaviour
         {
             for (int ix = 0; ix < m_Width; ix++)
             {
-                if ((ix == 50) && (iy == 49))
+                if ((ix == 50) && (iy == 48))
                 {
                     Debug.Log("Check it");
                 }
@@ -808,13 +808,13 @@ public class HexMapBuilder : MonoBehaviour
         ConfigureQuad();
 
         IdentifyIslands();
-        for (int i = 0; i < m_Islands.Count; i++)
-        {
-            if (m_Islands[i].m_HexPointIndeces.Count > 0)
-            {
-                Debug.Log($"Island {i.ToString()}: {m_Islands[i].m_HexPointIndeces.Count.ToString()}");
-            }
-        }
+        //for (int i = 0; i < m_Islands.Count; i++)
+        //{
+        //    if (m_Islands[i].m_HexPointIndeces.Count > 0)
+        //    {
+        //        Debug.Log($"Island {i.ToString()}: {m_Islands[i].m_HexPointIndeces.Count.ToString()}");
+        //    }
+        //}
     }
 
     void SetHexNeighbors()
@@ -1040,20 +1040,22 @@ public class HexMapBuilder : MonoBehaviour
             hex.m_Renderer.SetPropertyBlock(block);
             hex.m_Block = block;
 
-            //if (hex.m_HexVisibility != Hex.HexVisibility.Known)
-            //{
-            //    if (index < 0x3f)
-            //    {
-            //        if (Random.Range(0f, 1f) < m_HexWaystationProbability)
-            //        {
-            //            hex.SetHexSubType(Hex.HexSubType.Waystation);
-            //        }
-            //        else if (Random.Range(0f, 1f) < m_HexHazardProbability)
-            //        {
-            //            hex.SetHexSubType(Hex.HexSubType.Hazard);
-            //        }
-            //    }
-            //}
+            // This needs tweaking.  A hex may have hex points from different islands.
+            // This methodology does not allow for this.
+            if (hex.m_HexVisibility != Hex.HexVisibility.Known)
+            {
+                if (index < 0x3f)
+                {
+                    if (Random.Range(0f, 1f) < m_HexWaystationProbability)
+                    {
+                        hex.SetHexSubType(Hex.HexSubType.Waystation);
+                    }
+                    else if (Random.Range(0f, 1f) < m_HexHazardProbability)
+                    {
+                        hex.SetHexSubType(Hex.HexSubType.Hazard);
+                    }
+                }
+            }
         }
 
         int maskBits = 0;
@@ -1276,24 +1278,24 @@ public class HexMapBuilder : MonoBehaviour
 
     public void MoveDiscoveredHexesFromListToKnownHexes(List<Hex> discoveredHexes)
     {
-        //for (int i = 0; i < discoveredHexes.Count; i++)
-        //{
-        //    Hex hex = discoveredHexes[i];
-        //    if (hex.m_HexVisibility == Hex.HexVisibility.Discovered)
-        //    {
-        //        Hex.HexSubType subType = hex.GetHexSubType();
-        //        hex.SetHexVisibility(Hex.HexVisibility.Known);
-        //        for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
-        //        {
-        //            Hex.HexIndex hi = hex.m_HexPointIndeces[e];
-        //            if (hi != null)
-        //            {
-        //                m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
-        //            }
-        //        }
-        //        SetDecal(hex);
-        //    }
-        //}
+        for (int i = 0; i < discoveredHexes.Count; i++)
+        {
+            Hex hex = discoveredHexes[i];
+            if (hex.m_HexVisibility == Hex.HexVisibility.Discovered)
+            {
+                Hex.HexSubType subType = hex.GetHexSubType();
+                hex.SetHexVisibility(Hex.HexVisibility.Known);
+                for (int e = 0; e < hex.m_HexPointIndeces.Length; e++)
+                {
+                    Hex.HexIndex hi = hex.m_HexPointIndeces[e];
+                    if (hi != null)
+                    {
+                        m_HexPoints[hi.iy][hi.ix].pointVisibility = Hex.HexVisibility.Known;
+                    }
+                }
+                SetDecalAndHexPointMask(hex);
+            }
+        }
     }
 
     public void RegenerateUnknownHexes()

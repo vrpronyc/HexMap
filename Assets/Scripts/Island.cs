@@ -21,6 +21,14 @@ public class Island
     const string HEX_POINT_TITLE_PREFAB = "HexPointTitle";
 
     HexVisibility m_IslandVisibility = HexVisibility.Unknown;
+    public HexVisibility IslandVisibility
+    {
+        get
+        {
+            return m_IslandVisibility;
+        }
+    }
+
 
     [SerializeField]
     public int m_IslandIndex = -1;
