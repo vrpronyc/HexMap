@@ -1586,7 +1586,8 @@ public class NavigationController : MonoBehaviour
                         }
                         else
                         {
-                            Debug.Log($"Hex {hex.name} hexTri {hexTri.ToString()} not valid");
+
+                            Debug.Log($"Hex {(hex == null ? "Null" : hex.name)} hexTri {hexTri.ToString()} not valid");
                         }
                     }
                 }
