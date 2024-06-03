@@ -14382,6 +14382,8 @@ MonoBehaviour:
   m_HexPathPrefab: {fileID: 197011111066008754, guid: 8fec59317e94298498ac5753e98adf2a, type: 3}
   m_SailDwellTime: 1
   m_RadialProgressController: {fileID: 1328014709}
+  m_XBuffer: 0.1
+  m_YBuffer: 0.2
   m_ShipPositioner: {fileID: 1365797466}
   m_ShipTriSubPosition: {fileID: 879697450}
   m_ShipIcon:

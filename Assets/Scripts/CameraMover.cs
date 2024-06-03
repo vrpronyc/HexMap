@@ -64,6 +64,28 @@ public class CameraMover : MonoBehaviour
         m_CameraLookAtTransform.position = m_CameraLookAtTransform.position + new Vector3(delta.x, delta.y, 0);
     }
 
+    public void CenterCameraY(Vector3 objectPos)
+    {
+        Vector3 pos = Camera.main.WorldToScreenPoint(objectPos);
+        //Debug.Log($"objectPos world {m_CameraLookAtTransform.position.ToString("R")}, screen {pos.ToString("R")}");
+        pos.y = (float)(Screen.height) * 0.5f ;
+        Vector3 newPos = Camera.main.ScreenToWorldPoint(pos);
+        float deltaY = objectPos.y - newPos.y;
+        m_CameraLookAtTransform.position = new Vector3(m_CameraLookAtTransform.position.x, m_CameraLookAtTransform.position.y + deltaY, m_CameraLookAtTransform.position.z);
+        //Debug.Log($"deltaY {deltaY.ToString("R")} m_CameraLookAtTransform NOW world {m_CameraLookAtTransform.position.ToString("R")}, screen {pos.ToString("R")}");
+    }
+    public void CenterCameraX(Vector3 objectPos)
+    {
+        Vector3 pos = Camera.main.WorldToScreenPoint(objectPos);
+        //Debug.Log($"objectPos world {m_CameraLookAtTransform.position.ToString("R")}, screen {pos.ToString("R")}");
+        pos.x = (float)(Screen.width) * 0.5f;
+        Vector3 newPos = Camera.main.ScreenToWorldPoint(pos);
+        float deltaX = objectPos.x - newPos.x;
+        m_CameraLookAtTransform.position = new Vector3(m_CameraLookAtTransform.position.x + deltaX, m_CameraLookAtTransform.position.y, m_CameraLookAtTransform.position.z);
+        //Debug.Log($"deltaY {deltaX.ToString("R")} m_CameraLookAtTransform NOW world {m_CameraLookAtTransform.position.ToString("R")}, screen {pos.ToString("R")}");
+    }
+
+
     void MoveCameraInOut(float delta)
     {
         Vector3 pos = m_CameraTransform.position + new Vector3(0, 0, delta);

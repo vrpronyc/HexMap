@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static NavigationController;
+using static UnityEngine.GraphicsBuffer;
 
 public class NavigationController : MonoBehaviour
 {
@@ -1259,6 +1260,10 @@ public class NavigationController : MonoBehaviour
 
     public float m_SailDwellTime = 1.0f;
     public RadialProgressController m_RadialProgressController;
+
+    public float m_XBuffer = 0.2f;
+    public float m_YBuffer = 0.2f;
+
     float m_SailDwellStart = 0f;
     public Transform m_ShipPositioner;
     public Transform m_ShipTriSubPosition;
@@ -1511,6 +1516,26 @@ public class NavigationController : MonoBehaviour
     HexMovementEffect MoveToHex(ShipManager ship, Hex hex, HexTri hexTri)
     {
         m_ShipPositioner.localPosition = hex.GetHexPosition();
+
+        Vector3 screenPositon = Camera.main.WorldToScreenPoint(m_ShipPositioner.position);
+        float x = screenPositon.x /(float)(Screen.width);
+        float y = screenPositon.y /(float)(Screen.height);
+        //Debug.Log($"Ship at {x.ToString("R")}, {y.ToString("R")}");
+        if ((y < m_YBuffer)
+            || (y > (1.0f - m_YBuffer)))
+        {
+            CameraMover.Instance.CenterCameraY(m_ShipPositioner.position);
+        }
+        screenPositon = Camera.main.WorldToScreenPoint(m_ShipPositioner.position);
+        x = screenPositon.x / (float)(Screen.width);
+        y = screenPositon.y / (float)(Screen.height);
+        //Debug.Log($"Ship at {x.ToString("R")}, {y.ToString("R")}");
+        if ((x < m_XBuffer)
+            || (x > (1.0f - m_XBuffer)))
+        {
+            CameraMover.Instance.CenterCameraX(m_ShipPositioner.position);
+        }
+
         m_ShipTriSubPosition.localPosition = m_HexTriCenters[(int)hexTri];
         HexPosition hexPosition = new HexPosition(hex, hexTri);
         ship.SetShipLocation(hexPosition); 
